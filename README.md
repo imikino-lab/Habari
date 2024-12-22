@@ -50,8 +50,11 @@ This application, developed using **C# Core**, provides a robust framework for c
 - **AI-Powered Decision Making**: Integrate machine learning models for advanced decision logic.
 - **Workflow Templates**: Provide prebuilt templates for common workflows.
 
+## Detailled Features
+More features are available in [this document](docs/DETAILLEDFEATURES.md).
+
 ## Contributing
 We welcome contributions! Please see the [contributing guide](CONTRIBUTING.md) for more details.
 
 ## License
-This project is licensed under the [MIT License](LICENSE.txt).
+This project is licensed under the [MIT License](LICENSE.md).
