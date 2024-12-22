@@ -7,7 +7,7 @@ This application, developed using **C# Core**, provides a robust framework for c
 - **Workflow Builder**: Intuitive drag-and-drop interface to define workflows.
 - **Modularity**: Highly modular design that supports reusable components.
 - **Real-Time Monitoring**: Track workflow execution and receive real-time updates.
-- **Extensibility**: Easily extend functionality through plugins or custom integrations.
+- **Extensibility**: Easily extend functionality through plugins.
 - **Error Handling**: Comprehensive logging and error management.
 
 ## Use Cases
@@ -25,9 +25,7 @@ This application, developed using **C# Core**, provides a robust framework for c
 
 ## Key Technologies
 - **C# Core**: Provides a high-performance, cross-platform foundation.
-- **Entity Framework Core**: For database interactions.
-- **SignalR**: For real-time communication.
-- **RESTful API**: Enables integration with third-party applications.
+- ****
 
 ## Getting Started
 1. **Clone the Repository**:
