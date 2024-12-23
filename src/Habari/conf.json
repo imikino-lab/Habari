@@ -1,0 +1,44 @@
+{
+  "stepsDirectories": [
+    "./steps"
+  ],
+  "listenersDirectories": [
+    "./listeners"
+  ],
+  "workflow": {
+    "code": "Habari.Listener.Url.Ask",
+    "host": "127.0.0.1",
+    "port": 9000,
+    "ssl": false,
+    "defaultPageName": "index.html",
+    "defaultGet": {
+      "id": 0,
+      "code": "Get",
+      "steps": [
+        {
+          "id": 1,
+          "code": "Habari.Action.File.Read",
+          "rootDirectory": "./www"
+        }
+      ],
+      "relations": [
+        {
+          "from": "trigger.0.path",
+          "to": "step.1.path",
+          "name": "path"
+        },
+        {
+          "from": "step.1.content",
+          "to": "trigger.0.content",
+          "name": "content"
+        },
+        {
+          "from": "step.1.fileNotFound",
+          "to": "trigger.0.contentNotFound",
+          "name": "fileNotFound"
+        }
+      ]
+    },
+    "triggers": []
+  }
+}

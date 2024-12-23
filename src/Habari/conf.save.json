@@ -1,0 +1,117 @@
+{
+    "actionsDirectories": [
+        "./actions"
+    ],
+    "triggersDirectories": [
+        "./triggers"
+    ],
+    "configurations": [
+        {
+            "trigger": {
+                "code": "Habari.Trigger.Url.Get",
+                "host": "127.0.0.1",
+                "port": 8080,
+                "conditions": [
+                    {
+                        "condition": {
+                            "criterias": [
+                                {
+                                    "from": "*",
+                                    "url": "/[.*]",
+                                    "method": "GET"
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "code": "Habari.Action.File.Read",
+                                    "parameters": {
+                                        "path": "{url}"
+                                    },
+                                    "actions": []
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "condition": {
+                            "criterias": [
+                                {
+                                    "from": "127.0.0.1",
+                                    "url": "/api/[.*]",
+                                    "method": "GET"
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "code": "Habari.Action.Database",
+                                    "parameters": {
+                                        "host": "127.0.0.1",
+                                        "login": "user",
+                                        "password": "",
+                                        "schema": "",
+                                        "objectname": "{url}",
+                                        "objecttype": "table",
+                                        "action": "SELECT"
+                                    },
+                                    "actions": []
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "condition": {
+                            "criterias": [
+                                {
+                                    "from": "127.0.0.1",
+                                    "url": "/api/[.*]",
+                                    "method": "POST"
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "code": "Habari.Action.Database",
+                                    "parameters": {
+                                        "host": "127.0.0.1",
+                                        "login": "user",
+                                        "password": "",
+                                        "schema": "",
+                                        "objectname": "{url}",
+                                        "objecttype": "table",
+                                        "action": "INSERT"
+                                    },
+                                    "actions": []
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "condition": {
+                            "criterias": [
+                                {
+                                    "from": "127.0.0.1",
+                                    "url": "/api/[.*]",
+                                    "method": "PUT"
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "code": "Habari.Action.Database",
+                                    "parameters": {
+                                        "host": "127.0.0.1",
+                                        "login": "user",
+                                        "password": "",
+                                        "schema": "",
+                                        "objectname": "{url}",
+                                        "objecttype": "table",
+                                        "action": "UPDATE"
+                                    },
+                                    "actions": []
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
