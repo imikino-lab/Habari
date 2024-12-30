@@ -9,7 +9,7 @@ public class DependencyLoadContext : AssemblyLoadContext
 
     public DependencyLoadContext(string dependencyFilename)
     {
-        assemblyDependencyResolver = new AssemblyDependencyResolver(dependencyFilename);
+        assemblyDependencyResolver = new (dependencyFilename);
     }
 
     protected override Assembly? Load(AssemblyName assemblyName)

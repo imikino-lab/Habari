@@ -2,7 +2,7 @@
 
 namespace Habari.Library.Parameters
 {
-    public class InputParameter : IInputParameter
+    public class Input : IInput
     {
         public string Code { get; private set; }
 
@@ -14,13 +14,13 @@ namespace Habari.Library.Parameters
 
         public string Name { get; private set; }
 
-        public IOutputParameter? Source { get; private set; }
+        public IOutput? Source { get; private set; }
 
         public IStep Step { get; private set; }
 
         public Type[] Types { get; private set; }
 
-        public InputParameter(IStep step, string code, string name, bool isRequired, params Type[] types)
+        public Input(IStep step, string code, string name, bool isRequired, params Type[] types)
         {
             Code = code.ToLower();
             IsRequired = isRequired;
@@ -34,7 +34,7 @@ namespace Habari.Library.Parameters
             return (T?)context.Get((Source?.Code ?? Code), typeof(T));
         }
 
-        public bool Link(IOutputParameter source)
+        public bool Link(IOutput source)
         {
             bool result = false;
             if (source.Types.Any(type => Types.Contains(type)))

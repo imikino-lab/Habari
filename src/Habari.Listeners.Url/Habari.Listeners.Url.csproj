@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Habari.Library\Habari.Library.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;.\$(AssemblyName).dll&quot; &quot;..\..\..\..\Habari\bin\x64\Debug\net8.0\listeners\$(AssemblyName).dll&quot;" WorkingDirectory="$(OutDir)" />
+  </Target>
+
 </Project>

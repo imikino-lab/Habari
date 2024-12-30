@@ -5,7 +5,7 @@ namespace Habari.Library.Steps
 {
     public class WorkflowContext
     {
-        private Dictionary<string, Dictionary<Type, object?>> Data { get; } = new Dictionary<string, Dictionary<Type, object?>>();
+        private Dictionary<string, Dictionary<Type, object?>> Data { get; } = new ();
 
         public void Set(string key, params (Type, object?)[] values)
         {

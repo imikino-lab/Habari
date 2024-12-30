@@ -1,6 +1,7 @@
 ﻿using Habari.Library.Listeners;
 using Habari.Library.Parameters;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Habari.Library.Steps
@@ -13,33 +14,39 @@ namespace Habari.Library.Steps
 
         public abstract string Description { get; }
 
+        public Inputs Inputs { get; } = new();
+
         public abstract string Name { get; }
 
-        public InputParameters Inputs { get; protected set; } = new InputParameters();
-
-        public OutputParameters Outputs { get; protected set; } = new OutputParameters();
+        public Outputs Outputs { get; } = new();
 
         public StepStatus Status { get; protected set; }
 
-        public IList<IStep> Steps { get; protected set; } = new List<IStep>();
+        public List<IStep> Steps { get; protected set; } = new ();
 
-        private IList<IStep> ResolveExcutionOrder()
+        public float X { get; set; }
+
+        public float Y { get; set; }
+
+        public Constants Constants { get; } = new();
+
+        private List<IStep> ResolveExcutionOrder()
         {
 
-            Dictionary<IStep, List<IStep>> graph = new Dictionary<IStep, List<IStep>>();
-            Dictionary<IStep, int> degree = new Dictionary<IStep, int>();
+            Dictionary<IStep, List<IStep>> graph = new ();
+            Dictionary<IStep, int> degree = new ();
 
             // Initialize
             foreach (IStep step in Steps)
             {
-                graph[step] = new List<IStep>();
+                graph[step] = new ();
                 degree[step] = 0;
             }
 
             //Compute Degree
             foreach (IStep step in Steps)
             {
-                foreach (IOutputParameter output in step.Outputs)
+                foreach (IOutput output in step.Outputs)
                 {
                     foreach (IStep dependent in Steps.Where(s => s.Inputs.Values.Any(input => input.Source!.Equals(output))))
                     {
@@ -49,8 +56,8 @@ namespace Habari.Library.Steps
                 }
             }
 
-            IList<IStep> sortedSteps = new List<IStep>();
-            Queue<IStep> queue = new Queue<IStep>(degree.Where(d => d.Value == 0).Select(d => d.Key));
+            List<IStep> sortedSteps = new ();
+            Queue<IStep> queue = new (degree.Where(d => d.Value == 0).Select(d => d.Key));
 
             while (queue.Any())
             {
@@ -74,9 +81,9 @@ namespace Habari.Library.Steps
             return sortedSteps;
         }
 
-        private IList<IStep> ValidateRelations()
+        private List<IStep> ValidateRelations()
         {
-            List<IStep> result = new List<IStep>();
+            List<IStep> result = new ();
 
             if (!Inputs.ValidateLink())
                 result.Add(this);
@@ -91,30 +98,62 @@ namespace Habari.Library.Steps
         public void Load(JsonObject config)
         {
             Id = config["id"]!.GetValue<int>();
-            LoadCustomParameters(config);
-            LoadSteps(config);
-            LoadRelations(config);
+            X = config["x"]!.GetValue<float>();
+            Y = config["y"]!.GetValue<float>();
+            LoadConstants(config);
+            LoadInputs();
+            LoadOutputs();
+            LoadStepsAndRelations(config);
         }
 
-        public abstract void LoadCustomParameters(JsonObject config);
-
-        public void Run(WorkflowContext context)
+        public async Task RunAsync(WorkflowContext context)
         {
-            IList<IStep> stepMissingRelations = ValidateRelations();
+            List<IStep> stepMissingRelations = ValidateRelations();
             if (stepMissingRelations.Any())
             {
                 throw new Exception("Missing required parameters.");
             }
 
-            IList<IStep> sortedSteps = ResolveExcutionOrder();
+            List<IStep> sortedSteps = ResolveExcutionOrder();
 
             foreach (IStep step in sortedSteps)
             {
-                step.Run(context);
+                await step.RunAsync(context);
             }
         }
 
-        private void LoadSteps(JsonObject config)
+        private void LoadConstants(JsonObject config)
+        {
+            var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(ConstantAttribute), false).Any());
+            foreach (var property in properties)
+            {
+                var attribute = (ConstantAttribute)property.GetCustomAttributes(typeof(ConstantAttribute), false).First();
+                Constants.Add(new Constant(this, attribute.Code, attribute.Name, attribute.IsRequired));
+                property.SetValue(this, JsonSerializer.Deserialize(config[attribute.Code], property.PropertyType));
+            }
+        }
+
+        private void LoadInputs()
+        {
+            var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(InputAttribute), false).Any());
+            foreach (var property in properties)
+            {
+                var attribute = (InputAttribute)property.GetCustomAttributes(typeof(InputAttribute), false).First();
+                Inputs.Add(new Input(this, attribute.Code, attribute.Name, attribute.IsRequired, attribute.Types));
+            }
+        }
+
+        private void LoadOutputs()
+        {
+            var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(OutputAttribute), false).Any());
+            foreach (var property in properties)
+            {
+                var attribute = (OutputAttribute)property.GetCustomAttributes(typeof(OutputAttribute), false).First();
+                Outputs.Add(new Output(this, attribute.Code, attribute.Name, attribute.Types));
+            }
+        }
+
+        private void LoadStepsAndRelations(JsonObject config)
         {
             foreach (JsonNode? stepConfig in config!["steps"]!.AsArray())
             {
@@ -125,10 +164,7 @@ namespace Habari.Library.Steps
                     Steps.Add(step);
                 }
             }
-        }
 
-        private void LoadRelations(JsonObject config)
-        {
             foreach (JsonNode? relationConfig in config!["relations"]!.AsArray())
             {
                 string[] from = relationConfig!["from"]!.AsValue().GetValue<string>().Split('.');

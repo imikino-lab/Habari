@@ -2,7 +2,7 @@
 
 namespace Habari.Library.Parameters
 {
-    public class OutputParameter : IOutputParameter
+    public class Output : IOutput
     {
         public string Code { get; private set; }
 
@@ -14,7 +14,7 @@ namespace Habari.Library.Parameters
 
         public string ContextKey => $"{Step.Code}.{Step.Id}.Output.{Code}";
 
-        public OutputParameter(IStep step, string code, string name, params Type[] types)
+        public Output(IStep step, string code, string name, params Type[] types)
         {
             Code = code.ToLower();
             Name = name;

@@ -26,6 +26,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\Configuration.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Configuration.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Configuration.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="conf.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

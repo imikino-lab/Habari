@@ -9,20 +9,24 @@ namespace Habari.Library.Steps
 
         string Code { get; }
 
+        Constants Constants { get; }
+
         string Description { get; }
+
+        Inputs Inputs { get; }
 
         string Name { get; }
 
-        InputParameters Inputs { get; }
-
-        OutputParameters Outputs { get; }
+        Outputs Outputs { get; }
 
         StepStatus Status { get; }
 
+        float X { get; set; }
+
+        float Y { get; set; }
+
         void Load(JsonObject config);
 
-        void LoadCustomParameters(JsonObject config);
-
-        void Run(WorkflowContext context);
+        Task RunAsync(WorkflowContext context);
     }
 }
