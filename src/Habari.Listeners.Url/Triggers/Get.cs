@@ -20,11 +20,5 @@ namespace Habari.Listeners.Url.Triggers
         {
             
         }
-
-        public override void LoadCustomParameters(JsonObject config)
-        {
-            if(config["route"] != null)
-                Route = config["route"]!.GetValue<string>();
-        }
     }
 }

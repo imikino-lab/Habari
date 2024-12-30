@@ -1,11 +1,12 @@
-﻿namespace Habari.Library.Parameters
+﻿using Habari.Library.Steps;
+
+namespace Habari.Library.Parameters
 {
-    public class InputParameters
+    public class Outputs
     {
+        private Dictionary<string, Output> _innerDictionary = new ();
 
-        private Dictionary<string, InputParameter> _innerDictionary = new Dictionary<string, InputParameter>();
-
-        public InputParameter this[string key]
+        public Output this[string key]
         {
             get
             {
@@ -26,13 +27,13 @@
 
         public ICollection<string> Keys => _innerDictionary.Keys;
 
-        public ICollection<InputParameter> Values => _innerDictionary.Values;
+        public ICollection<Output> Values => _innerDictionary.Values;
 
         public int Count => _innerDictionary.Count;
 
         public bool IsReadOnly => false;
 
-        public void Add(InputParameter value)
+        public void Add(Output value)
         {
             _innerDictionary.Add(value.Code.ToLower(), value);
         }
@@ -47,7 +48,7 @@
             return _innerDictionary.ContainsKey(key.ToLower());
         }
 
-        public IEnumerator<InputParameter> GetEnumerator()
+        public IEnumerator<Output> GetEnumerator()
         {
             return _innerDictionary.Values.GetEnumerator();
         }
@@ -57,14 +58,9 @@
             return _innerDictionary.Remove(key.ToLower());
         }
 
-        public bool TryGetValue(string key, out InputParameter? value)
+        public bool TryGetValue(string key, out Output? value)
         {
             return _innerDictionary.TryGetValue(key.ToLower(), out value);
-        }
-
-        public bool ValidateLink()
-        {
-            return Values.All(value => value.IsLinked && value.IsRequired) || Values.All(value => !value.IsLinked && value.IsRequired);
         }
     }
 }

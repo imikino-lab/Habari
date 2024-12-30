@@ -1,6 +1,6 @@
 ﻿namespace Habari.Library.Parameters
 {
-    public interface IOutputParameter : IParameter
+    public interface IOutput : IParameter
     {
     }
 }

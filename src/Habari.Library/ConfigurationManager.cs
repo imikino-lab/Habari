@@ -13,11 +13,17 @@ public sealed class ConfigurationManager
 
     private ILogger? _logger { get; set; }
 
-    public Dictionary<string, Type> AvailableListeners { get; private set; } = new Dictionary<string, Type>();
+    public Dictionary<string, Type> AvailableListeners { get; private set; } = new();
 
-    public Dictionary<string, Type> AvailableSteps { get; private set; } = new Dictionary<string, Type>();
+    public Dictionary<string, Type> AvailableSteps { get; private set; } = new();
+
+    public Dictionary<string, Dictionary<string, Type>> AvailableTriggers { get; private set; } = new();
+
+    public int ConfigurationPort { get; private set; } = 9000;
 
     public static ConfigurationManager Instance { get => configurationManager.Value; }
+
+    public List<Workflow> Workflows { get; private set; } = new();
 
     private ConfigurationManager()
     {
@@ -39,19 +45,23 @@ public sealed class ConfigurationManager
         _logger = logger;
     }
 
-    public IListener? GetListener(string listenerCode)
+    public Listener? GetListener(string listenerCode)
     {
-        return Activator.CreateInstance(AvailableListeners[listenerCode]) as IListener;
+        return Activator.CreateInstance(AvailableListeners[listenerCode]) as Listener;
     }
 
-    public IStep? GetStep(string stepCode)
+    public Step? GetStep(string stepCode)
     {
-        return Activator.CreateInstance(AvailableSteps[stepCode]) as IStep;
+        return Activator.CreateInstance(AvailableSteps[stepCode]) as Step;
     }
 
-    public void LoadConfiguration(string filename, out Workflow? workflow)
+    public Trigger? GetTrigger(string listenerCode, string triggerCode)
     {
-        workflow = null;
+        return Activator.CreateInstance(AvailableTriggers[listenerCode][triggerCode]) as Trigger;
+    }
+
+    public void LoadConfiguration(string filename)
+    {
         if (!File.Exists(filename))
         {
             throw new FileNotFoundException($"Configuration file not found.", filename);
@@ -71,9 +81,9 @@ public sealed class ConfigurationManager
             {
                 string directory = workflowStepDirectory!.AsValue().ToString();
                 Directory.CreateDirectory(directory);
-                foreach (string actionFilename in Directory.GetFiles(directory))
-                    foreach (IStep iWorkflowStep in LoadTypesFromAssembly<IStep>(LoadAssembly(actionFilename)))
-                        AvailableSteps.Add(iWorkflowStep.Code, iWorkflowStep.GetType());
+                foreach (string actionFilename in Directory.GetFiles(directory).Where(actionFilename => Path.GetExtension(actionFilename).Equals(".dll", StringComparison.InvariantCultureIgnoreCase)))
+                    foreach (Step step in LoadTypesFromAssembly<Step>(LoadAssembly(actionFilename)))
+                        AvailableSteps.Add(step.Code, step.GetType());
             }
 
         if (config!["listenersDirectories"] != null)
@@ -81,21 +91,32 @@ public sealed class ConfigurationManager
             {
                 string directory = listenersDirectory!.AsValue().ToString();
                 Directory.CreateDirectory(directory);
-                foreach (string listenerFilename in Directory.GetFiles(directory))
-                    foreach (IListener iListener in LoadTypesFromAssembly<IListener>(LoadAssembly(listenerFilename)))
-                        AvailableListeners.Add(iListener.Code, iListener.GetType());
+                foreach (string listenerFilename in Directory.GetFiles(directory).Where(listenerFilename => Path.GetExtension(listenerFilename).Equals(".dll", StringComparison.InvariantCultureIgnoreCase)))
+                    foreach (Listener listener in LoadTypesFromAssembly<Listener>(LoadAssembly(listenerFilename)))
+                    {
+                        AvailableListeners.Add(listener.Code, listener.GetType());
+                        AvailableTriggers.Add(listener.Code, new());
+                        foreach (Trigger trigger in LoadTypesFromAssembly<Trigger>(LoadAssembly(listenerFilename)))
+                            AvailableTriggers[listener.Code].Add(trigger.Code, trigger.GetType());
+                    }
             }
 
-        if (config!["workflow"] != null)
-        {
-            string listenerCode = config!["workflow"]!["code"]!.AsValue().GetValue<string>();
-            IListener? listener = GetListener(listenerCode);
-            if (listener != null)
+        if (config!["configurationPort"] != null)
+            ConfigurationPort = config!["configurationPort"]!.AsValue().GetValue<int>();
+
+        if (config!["workflows"] != null)
+            foreach (JsonNode? workflowConfig in config!["workflows"]!.AsArray())
             {
-                workflow = new Workflow(listener);
-                workflow!.Load(config!["workflow"]!.AsObject());
+                string listenerCode = workflowConfig!["code"]!.AsValue().GetValue<string>();
+                IListener? listener = GetListener(listenerCode);
+                if (listener != null)
+                {
+                    Workflow workflow = new(listener);
+                    workflow!.Load(workflowConfig!.AsObject());
+                    workflow.Execute();
+                    Workflows.Add(workflow);
+                }
             }
-        }
 
         _logger?.LogInformation($"Configuration loaded.");
     }
@@ -108,8 +129,15 @@ public sealed class ConfigurationManager
         }
 
         _logger?.LogInformation($"Loading library from: {assemblyPath}");
-        DependencyLoadContext loadContext = new DependencyLoadContext(assemblyPath);
-        return loadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(assemblyPath));
+        DependencyLoadContext loadContext = new(assemblyPath);
+        try
+        {
+            return loadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(assemblyPath));
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private IEnumerable<I> LoadTypesFromAssembly<I>(Assembly? assembly) where I : class
@@ -120,7 +148,7 @@ public sealed class ConfigurationManager
 
             foreach (Type type in assembly!.GetTypes())
             {
-                if (typeof(I).IsAssignableFrom(type))
+                if (typeof(I).IsAssignableFrom(type) && !type.IsAbstract)
                 {
                     I? result = Activator.CreateInstance(type) as I;
                     if (result != null)

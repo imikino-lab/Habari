@@ -1,4 +1,5 @@
-﻿using Habari.Library.Steps;
+﻿using Habari.Library.Parameters;
+using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
 namespace Habari.Library.Listeners
@@ -11,7 +12,13 @@ namespace Habari.Library.Listeners
 
         public abstract string Name { get; }
 
-        public IList<IStep> Triggers { get; protected set; } = new List<IStep>();
+        public List<IStep> Triggers { get; protected set; } = new ();
+
+        public int X { get; set; }
+
+        public int Y { get; set; }
+
+        public Constants Values { get; } = new();
 
         public abstract void Load(JsonObject config);
 

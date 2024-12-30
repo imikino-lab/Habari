@@ -10,48 +10,44 @@ namespace Habari.Actions.File
     {
         public override string Code => "Habari.Action.File.Read";
 
-        public OutputParameter Content => Outputs["content"];
+        [Output("content", "File content", typeof(byte[]), typeof(string))]
+        public Output Content => Outputs["content"];
 
         public override string Description => "Read the content of a file";
 
-        public OutputParameter FileNotFound => Outputs["fileNotFound"];
+        [Output("fileNotFound", "File not found", typeof(bool))]
+        public Output FileNotFound => Outputs["fileNotFound"];
 
         public override string Name => "";
 
-        public InputParameter Path => Inputs["path"];
+        [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
+        public Input Path => Inputs["path"];
 
+        [Constant("rootDirectory", "Root directory", true)]
         public string RootDirectory { get; set; } = "./www";
 
         public Read()
         {
-            Inputs.Add(new InputParameter(this, "path", "Asked path", true, typeof(byte[]), typeof(string)));
-            Outputs.Add(new OutputParameter(this, "content", "File content", typeof(byte[]), typeof(string)));
-            Outputs.Add(new OutputParameter(this, "fileNotFound", "File not found", typeof(bool)));
         }
 
-        public override void LoadCustomParameters(JsonObject config)
+        /*
+        public override void LoadConstants(JsonObject config)
         {
-            try
-            {
+            if(config["rootDirectory"] != null)
                 RootDirectory = config["rootDirectory"]!.GetValue<string>() ?? "./www";
-            }
-            catch
-            {
-                RootDirectory = "./www";
-            }
         }
+        */
 
-        public override void Run(WorkflowContext context)
+        public override async Task RunAsync(WorkflowContext context)
         {
             string path = Path.GetValue<string>(context)!;
             if (path.StartsWith('/'))
-            {
                 path = path.Substring(1);
-            }
+
             try
             {
-                byte[] fileContentBytes = IO.File.ReadAllBytes(IO.Path.Combine(RootDirectory, path));
-                string fileContentString = IO.File.ReadAllText(IO.Path.Combine(RootDirectory, path));
+                byte[] fileContentBytes = await IO.File.ReadAllBytesAsync(IO.Path.Combine(RootDirectory, path));
+                string fileContentString = await IO.File.ReadAllTextAsync(IO.Path.Combine(RootDirectory, path));
                 Content.SetValue(context, (typeof(byte[]), fileContentBytes), (typeof(string), fileContentString));
                 FileNotFound.SetValue(context, (typeof(bool), false));
             }

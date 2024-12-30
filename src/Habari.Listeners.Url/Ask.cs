@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Listeners;
+using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using Habari.Listeners.Url.Triggers;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Habari.Listeners.Url
 
         public override string Description => "Occurs when a url is asked";
 
-        public Get DefaultGet { get; private set; } = new Get();
+        public Get DefaultGet { get; private set; } = new ();
 
         public string DefaultPageName { get; set; } = "index.html";
 
@@ -58,8 +59,8 @@ namespace Habari.Listeners.Url
 
         public override void Start(WorkflowContext context)
         {
-            WebserverSettings webserverSettings = new WebserverSettings(Host, Port, Ssl);
-            Webserver = new Webserver(webserverSettings, async (HttpContextBase contextBase) =>
+            WebserverSettings webserverSettings = new (Host, Port, Ssl);
+            Webserver = new (webserverSettings, async (HttpContextBase contextBase) =>
             {
                 await RunRoute(contextBase, context, DefaultGet);
             });
@@ -91,14 +92,9 @@ namespace Habari.Listeners.Url
                 pathString += DefaultPageName;
             }
             byte[] pathByte = Encoding.Default.GetBytes(pathString);
+            trigger.Context.SetValue(context, (typeof(HttpContextBase), contextBase));
             trigger.Path.SetValue(context, (typeof(string), pathString), (typeof(byte[]), pathByte));
-            trigger.Run(context);
-
-            if (trigger.ContentNotFound.GetValue<bool>(context))
-            {
-                contextBase.Response.StatusCode = 404;
-            }
-            await contextBase.Response.Send(trigger.Content.GetValue<byte[]>(context));
+            await trigger.RunAsync(context);
             return;
         }
     }

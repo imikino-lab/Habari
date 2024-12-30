@@ -1,4 +1,5 @@
-﻿using Habari.Library;
+﻿using Habari.Configuration;
+using Habari.Library;
 using Habari.Library.Steps;
 using Habari.Library.Workflows;
 using Microsoft.Extensions.Logging;
@@ -23,12 +24,13 @@ class Program
         ILogger logger = loggerFactory.CreateLogger("Habari");
         ConfigurationManager.Instance.ConfigureLogger(logger);
 
+        WorkflowConfiguration workflowConfiguration = new (logger);
+
         try
         {
-            Workflow? workflow;
-            var context = new WorkflowContext();
-            ConfigurationManager.Instance.LoadConfiguration(args.Any() ? args[0] : "conf.json", out workflow);
-            workflow!.Execute(context);
+            workflowConfiguration.Start();
+            //WorkflowContext context = new ();
+            ConfigurationManager.Instance.LoadConfiguration(args.Any() ? args[0] : "conf.json");
         }
         catch (Exception ex)
         {
@@ -37,6 +39,7 @@ class Program
         finally
         {
             Console.ReadLine();
+            workflowConfiguration.Stop();
         }
     }
 }
