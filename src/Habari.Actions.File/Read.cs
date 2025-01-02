@@ -22,7 +22,7 @@ namespace Habari.Actions.File
         [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
         public Input Path => Inputs["path"];
 
-        [Constant("rootDirectory", "Root directory", true)]
+        [Constant("rootDirectory", "Root directory", ConstantType.Path, true)]
         public string RootDirectory { get; set; } = "./www";
 
         public Read()
@@ -57,6 +57,8 @@ namespace Habari.Actions.File
                 Content.SetValue(context, (typeof(byte[]), fileContentBytes), (typeof(string), fileContentString));
                 FileNotFound.SetValue(context, (typeof(bool), true));
             }
+
+            return;
         }
     }
 }

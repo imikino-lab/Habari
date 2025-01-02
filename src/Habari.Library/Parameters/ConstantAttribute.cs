@@ -9,13 +9,16 @@
 
         public string Name { get; private set; }
 
-        public ConstantAttribute(string code, string name) : this(code, name, false) { }
+        public ConstantType Type { get; set; }
 
-        public ConstantAttribute(string code, string name, bool isRequired)
+        public ConstantAttribute(string code, string name, ConstantType type) : this(code, name, type, false) { }
+
+        public ConstantAttribute(string code, string name, ConstantType type, bool isRequired)
         {
             Code = code;
-            Name = name;
             IsRequired = isRequired;
+            Name = name;
+            Type = type;
         }
     }
 }
