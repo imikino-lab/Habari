@@ -28,10 +28,10 @@ public class Workflow
         Listener!.Start(Context);
     }
 
-    public void Load(JsonObject config)
+    public void Load(JsonObject configuration)
     {
-        Listener?.Load(config);
-        foreach (JsonNode? triggerConfig in config!["triggers"]!.AsArray())
+        Listener?.Load(configuration);
+        foreach (JsonNode? triggerConfig in configuration!["triggers"]!.AsArray())
         {
             Listener?.LoadTrigger(triggerConfig!.AsObject());
         }

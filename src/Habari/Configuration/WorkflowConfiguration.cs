@@ -1,7 +1,9 @@
 ﻿using Habari.Library;
+using Habari.Library.Workflows;
 using Microsoft.Extensions.Logging;
 using System.Resources;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using WatsonWebserver;
 using WatsonWebserver.Core;
 using HttpMethod = WatsonWebserver.Core.HttpMethod;
@@ -73,14 +75,19 @@ namespace Habari.Configuration
                 await contextBase.Response.Send(drawflowStyleJs);
             });
 
+            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/workflows", async (HttpContextBase contextBase) =>
+            {
+                await contextBase.Response.Send(JsonSerializer.Serialize(value: ConfigurationManager.Instance.Workflows.Select(workflow => new KeyValuePair<string, Workflow>(workflow.Key, workflow.Value)).ToDictionary()));
+            });
+
             _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/listeners", async (HttpContextBase contextBase) =>
             {
-                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableListeners.Values.Select(value => new Listener(value))));
+                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableListeners.Values.Select(value => Activator.CreateInstance(value) as Library.Listeners.Listener)));
             });
 
             _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/steps", async (HttpContextBase contextBase) =>
             {
-                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableSteps.Values.Select(value => new Step(value))));
+                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableSteps.Values.Select(value => Activator.CreateInstance(value) as Library.Steps.Step)));
             });
 
             _webserver.Start();

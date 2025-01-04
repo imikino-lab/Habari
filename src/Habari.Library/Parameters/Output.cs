@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Steps;
+using System.Text.Json.Serialization;
 
 namespace Habari.Library.Parameters
 {
@@ -8,13 +9,16 @@ namespace Habari.Library.Parameters
 
         public string Name { get; private set; }
 
-        public IStep Step { get; private set; }
+        [JsonIgnore]
+        public IBase Step { get; private set; }
 
+        [JsonIgnore]
         public Type[] Types { get; private set; }
 
+        [JsonIgnore]
         public string ContextKey => $"{Step.Code}.{Step.Id}.Output.{Code}";
 
-        public Output(IStep step, string code, string name, params Type[] types)
+        public Output(IBase step, string code, string name, params Type[] types)
         {
             Code = code.ToLower();
             Name = name;

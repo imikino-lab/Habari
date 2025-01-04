@@ -14,28 +14,16 @@ namespace Habari.Actions.File
 
         public override string Description => "Read the content of a file";
 
-        [Output("fileNotFound", "File not found", typeof(bool))]
-        public Output FileNotFound => Outputs["fileNotFound"];
+        [Output("fileFound", "File found", typeof(bool))]
+        public Output FileFound => Outputs["fileFound"];
 
-        public override string Name => "";
+        public override string Name => "File reader";
 
         [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
         public Input Path => Inputs["path"];
 
         [Constant("rootDirectory", "Root directory", ConstantType.Path, true)]
         public string RootDirectory { get; set; } = "./www";
-
-        public Read()
-        {
-        }
-
-        /*
-        public override void LoadConstants(JsonObject config)
-        {
-            if(config["rootDirectory"] != null)
-                RootDirectory = config["rootDirectory"]!.GetValue<string>() ?? "./www";
-        }
-        */
 
         public override async Task RunAsync(WorkflowContext context)
         {
@@ -48,14 +36,14 @@ namespace Habari.Actions.File
                 byte[] fileContentBytes = await IO.File.ReadAllBytesAsync(IO.Path.Combine(RootDirectory, path));
                 string fileContentString = await IO.File.ReadAllTextAsync(IO.Path.Combine(RootDirectory, path));
                 Content.SetValue(context, (typeof(byte[]), fileContentBytes), (typeof(string), fileContentString));
-                FileNotFound.SetValue(context, (typeof(bool), false));
+                FileFound.SetValue(context, (typeof(bool), true));
             }
             catch
             {
                 string fileContentString = string.Empty;
                 byte[] fileContentBytes = Encoding.Default.GetBytes(fileContentString);
                 Content.SetValue(context, (typeof(byte[]), fileContentBytes), (typeof(string), fileContentString));
-                FileNotFound.SetValue(context, (typeof(bool), true));
+                FileFound.SetValue(context, (typeof(bool), false));
             }
 
             return;

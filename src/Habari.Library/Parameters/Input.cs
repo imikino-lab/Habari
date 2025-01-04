@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Steps;
+using System.Text.Json.Serialization;
 
 namespace Habari.Library.Parameters
 {
@@ -6,21 +7,26 @@ namespace Habari.Library.Parameters
     {
         public string Code { get; private set; }
 
+        [JsonIgnore]
         public string ContextKey => $"{Source?.ContextKey}";
 
+        [JsonIgnore]
         public bool IsLinked => Source != null;
 
         public bool IsRequired { get; private set; }
 
         public string Name { get; private set; }
 
+        [JsonIgnore]
         public IOutput? Source { get; private set; }
 
-        public IStep Step { get; private set; }
+        [JsonIgnore]
+        public IBase Step { get; private set; }
 
+        [JsonIgnore]
         public Type[] Types { get; private set; }
 
-        public Input(IStep step, string code, string name, bool isRequired, params Type[] types)
+        public Input(IBase step, string code, string name, bool isRequired, params Type[] types)
         {
             Code = code.ToLower();
             IsRequired = isRequired;
