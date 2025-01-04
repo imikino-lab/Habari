@@ -1,16 +1,16 @@
-﻿using Habari.Library.Listeners;
-using Habari.Library.Parameters;
-using System.Collections.Generic;
+﻿using Habari.Library.Parameters;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Habari.Library.Steps
 {
-    public abstract class Trigger : IStep
+    public abstract class Trigger : ITrigger
     {
         public int Id { get; protected set; }
 
         public abstract string Code { get; }
+
+        public Constants Constants { get; } = new();
 
         public abstract string Description { get; }
 
@@ -20,15 +20,13 @@ namespace Habari.Library.Steps
 
         public Outputs Outputs { get; } = new();
 
-        public StepStatus Status { get; protected set; }
-
-        public List<IStep> Steps { get; protected set; } = new ();
-
         public float X { get; set; }
 
         public float Y { get; set; }
 
-        public Constants Constants { get; } = new();
+        public StepStatus Status { get; protected set; }
+
+        public List<IStep> Steps { get; protected set; } = new ();
 
         private List<IStep> ResolveExcutionOrder()
         {
@@ -81,9 +79,9 @@ namespace Habari.Library.Steps
             return sortedSteps;
         }
 
-        private List<IStep> ValidateRelations()
+        private List<IBase> ValidateRelations()
         {
-            List<IStep> result = new ();
+            List<IBase> result = new ();
 
             if (!Inputs.ValidateLink())
                 result.Add(this);
@@ -95,20 +93,25 @@ namespace Habari.Library.Steps
 
         public abstract void HandleException(WorkflowContext context, Exception exception);
 
+        public Trigger()
+        {
+            CreateConstants();
+            CreateInputs();
+            CreateOutputs();
+        }
+
         public void Load(JsonObject config)
         {
             Id = config["id"]!.GetValue<int>();
             X = config["x"]!.GetValue<float>();
             Y = config["y"]!.GetValue<float>();
             LoadConstants(config);
-            LoadInputs();
-            LoadOutputs();
             LoadStepsAndRelations(config);
         }
 
         public async Task RunAsync(WorkflowContext context)
         {
-            List<IStep> stepMissingRelations = ValidateRelations();
+            List<IBase> stepMissingRelations = ValidateRelations();
             if (stepMissingRelations.Any())
             {
                 throw new Exception("Missing required parameters.");
@@ -122,18 +125,17 @@ namespace Habari.Library.Steps
             }
         }
 
-        private void LoadConstants(JsonObject config)
+        private void CreateConstants()
         {
             var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(ConstantAttribute), false).Any());
             foreach (var property in properties)
             {
                 var attribute = (ConstantAttribute)property.GetCustomAttributes(typeof(ConstantAttribute), false).First();
                 Constants.Add(new Constant(this, attribute.Code, attribute.Name, attribute.IsRequired));
-                property.SetValue(this, JsonSerializer.Deserialize(config[attribute.Code], property.PropertyType));
             }
         }
 
-        private void LoadInputs()
+        private void CreateInputs()
         {
             var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(InputAttribute), false).Any());
             foreach (var property in properties)
@@ -143,7 +145,7 @@ namespace Habari.Library.Steps
             }
         }
 
-        private void LoadOutputs()
+        private void CreateOutputs()
         {
             var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(OutputAttribute), false).Any());
             foreach (var property in properties)
@@ -153,11 +155,21 @@ namespace Habari.Library.Steps
             }
         }
 
+        private void LoadConstants(JsonObject config)
+        {
+            var properties = GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(ConstantAttribute), false).Any());
+            foreach (var property in properties)
+            {
+                var attribute = (ConstantAttribute)property.GetCustomAttributes(typeof(ConstantAttribute), false).First();
+                property.SetValue(this, JsonSerializer.Deserialize(config[attribute.Code], property.PropertyType));
+            }
+        }
+
         private void LoadStepsAndRelations(JsonObject config)
         {
             foreach (JsonNode? stepConfig in config!["steps"]!.AsArray())
             {
-                IStep? step = ConfigurationManager.Instance.GetStep(stepConfig!["code"]!.AsValue().GetValue<string>());
+                Step? step = ConfigurationManager.Instance.GetStep(stepConfig!["code"]!.AsValue().GetValue<string>());
                 if (step != null)
                 {
                     step.Load(stepConfig.AsObject());
@@ -169,8 +181,8 @@ namespace Habari.Library.Steps
             {
                 string[] from = relationConfig!["from"]!.AsValue().GetValue<string>().Split('.');
                 string[] to = relationConfig!["to"]!.AsValue().GetValue<string>().Split('.');
-                IStep? stepFrom = from[0].Equals("trigger", StringComparison.InvariantCultureIgnoreCase) ? this : Steps.FirstOrDefault(step => from[1].Equals(step.Id.ToString()));
-                IStep? stepTo = to[0].Equals("trigger", StringComparison.InvariantCultureIgnoreCase) ? this : Steps.FirstOrDefault(step => to[1].Equals(step.Id.ToString()));
+                IBase? stepFrom = from[0].Equals("trigger", StringComparison.InvariantCultureIgnoreCase) ? this : Steps.FirstOrDefault(step => from[1].Equals(step.Id.ToString()));
+                IBase? stepTo = to[0].Equals("trigger", StringComparison.InvariantCultureIgnoreCase) ? this : Steps.FirstOrDefault(step => to[1].Equals(step.Id.ToString()));
                 if (stepFrom != null && stepTo != null)
                     stepTo.Inputs[to[2]].Link(stepFrom.Outputs[from[2]]);
             }

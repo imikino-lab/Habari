@@ -5,11 +5,11 @@ namespace Habari.Actions.Logical
 {
     public class Xor : Step
     {
-        public override string Code => throw new NotImplementedException();
+        public override string Code => "Habari.Action.Logical.Xor";
 
-        public override string Description => throw new NotImplementedException();
+        public override string Description => "Perform a logical xor operation";
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "Logical xor";
 
         [Input("op1", "Operator 1", true, typeof(bool))]
         public Input Operator1 => Inputs["op1"];
@@ -17,7 +17,7 @@ namespace Habari.Actions.Logical
         [Input("op2", "Operator 2", true, typeof(bool))]
         public Input Operator2 => Inputs["op2"];
 
-        [Output("result", "And operation result", typeof(bool))]
+        [Output("result", "Xor operation result", typeof(bool))]
         public Output Result => Outputs["result"];
 
         public override Task RunAsync(WorkflowContext context)

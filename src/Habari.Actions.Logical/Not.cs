@@ -5,16 +5,16 @@ namespace Habari.Actions.Logical
 {
     public class Not : Step
     {
-        public override string Code => throw new NotImplementedException();
+        public override string Code => "Habari.Action.Logical.Not";
 
-        public override string Description => throw new NotImplementedException();
+        public override string Description => "Perform a logical not operation";
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "Logical not";
 
         [Input("op", "Operator", true, typeof(bool))]
         public Input Operator => Inputs["op"];
 
-        [Output("result", "And operation result", typeof(bool))]
+        [Output("result", "Not operation result", typeof(bool))]
         public Output Result => Outputs["result"];
 
         public override Task RunAsync(WorkflowContext context)

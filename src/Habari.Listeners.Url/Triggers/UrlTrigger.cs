@@ -16,8 +16,4 @@ public abstract class UrlTrigger : Trigger
 
     [Output("path", "Asked path", typeof(byte[]), typeof(string))]
     public Output Path => Outputs["path"];
-
-    public UrlTrigger()
-    {
-    }
 }

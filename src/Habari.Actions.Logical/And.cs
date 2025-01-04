@@ -5,11 +5,11 @@ namespace Habari.Actions.Logical
 {
     public class And : Step
     {
-        public override string Code => throw new NotImplementedException();
+        public override string Code => "Habari.Action.Logical.And";
 
-        public override string Description => throw new NotImplementedException();
+        public override string Description => "Perform a logical and operation";
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "Logical and";
 
         [Input("op1", "Operator 1", true, typeof(bool))]
         public Input Operator1 => Inputs["op1"];

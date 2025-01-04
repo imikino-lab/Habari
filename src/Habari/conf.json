@@ -6,57 +6,5 @@
     "./listeners"
   ],
   "configurationPort": 9000,
-  "workflows": [
-    {
-      "code": "Habari.Listener.Url.Ask",
-      "host": "127.0.0.1",
-      "port": 8080,
-      "ssl": false,
-      "defaultPageName": "index.html",
-      "defaultGet": {
-        "id": 0,
-        "code": "Get",
-        "x": 0,
-        "y": 0,
-        "steps": [
-          {
-            "id": 1,
-            "x": 0,
-            "y": 0,
-            "code": "Habari.Action.File.Read",
-            "rootDirectory": "./www"
-          },
-          {
-            "id": 2,
-            "x": 0,
-            "y": 0,
-            "code": "Habari.Action.Url.Write"
-          }
-        ],
-        "relations": [
-          {
-            "from": "trigger.0.path",
-            "to": "step.1.path",
-            "name": "path"
-          },
-          {
-            "from": "step.1.content",
-            "to": "step.2.content",
-            "name": "content"
-          },
-          {
-            "from": "step.1.fileNotFound",
-            "to": "step.2.contentNotFound",
-            "name": "contentNotFound"
-          },
-          {
-            "from": "trigger.0.context",
-            "to": "step.2.context",
-            "name": "context"
-          }
-        ]
-      },
-      "triggers": []
-    }
-  ]
+  "workflowsDirectory": "./workflows"
 }

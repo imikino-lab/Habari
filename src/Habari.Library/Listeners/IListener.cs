@@ -1,9 +1,11 @@
-﻿using Habari.Library.Parameters;
+﻿using Habari.Library.Json;
+using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
 namespace Habari.Library.Listeners
 {
+    [InterfaceJsonConverter(typeof(InterfaceJsonConverter<IListener>))]
     public interface IListener
     {
         string Code { get; }
@@ -12,7 +14,7 @@ namespace Habari.Library.Listeners
 
         string Name { get; }
 
-        List<IStep> Triggers { get; }
+        List<ITrigger> Triggers { get; }
 
         int X { get; set; }
 

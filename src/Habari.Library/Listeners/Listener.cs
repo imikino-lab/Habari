@@ -12,7 +12,7 @@ namespace Habari.Library.Listeners
 
         public abstract string Name { get; }
 
-        public List<IStep> Triggers { get; protected set; } = new ();
+        public List<ITrigger> Triggers { get; protected set; } = new ();
 
         public int X { get; set; }
 

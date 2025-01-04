@@ -4,6 +4,7 @@ using Habari.Library.Workflows;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Habari.Library;
 
@@ -23,7 +24,7 @@ public sealed class ConfigurationManager
 
     public static ConfigurationManager Instance { get => configurationManager.Value; }
 
-    public List<Workflow> Workflows { get; private set; } = new();
+    public Dictionary<string, Workflow> Workflows { get; private set; } = new();
 
     private ConfigurationManager()
     {
@@ -104,9 +105,13 @@ public sealed class ConfigurationManager
         if (config!["configurationPort"] != null)
             ConfigurationPort = config!["configurationPort"]!.AsValue().GetValue<int>();
 
-        if (config!["workflows"] != null)
-            foreach (JsonNode? workflowConfig in config!["workflows"]!.AsArray())
+        if (config!["workflowsDirectory"] != null)
+        {
+            string directory = config!["workflowsDirectory"]!.AsValue().ToString();
+            Directory.CreateDirectory(directory);
+            foreach (string workflowFilename in Directory.GetFiles(directory))
             {
+                JsonNode? workflowConfig = JsonNode.Parse(File.ReadAllText(workflowFilename));
                 string listenerCode = workflowConfig!["code"]!.AsValue().GetValue<string>();
                 IListener? listener = GetListener(listenerCode);
                 if (listener != null)
@@ -114,9 +119,10 @@ public sealed class ConfigurationManager
                     Workflow workflow = new(listener);
                     workflow!.Load(workflowConfig!.AsObject());
                     workflow.Execute();
-                    Workflows.Add(workflow);
+                    Workflows.Add(Path.GetFileNameWithoutExtension(workflowFilename), workflow);
                 }
             }
+        }
 
         _logger?.LogInformation($"Configuration loaded.");
     }

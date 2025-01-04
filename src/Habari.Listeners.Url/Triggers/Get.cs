@@ -1,5 +1,4 @@
 ﻿using Habari.Library.Steps;
-using System.Text.Json.Nodes;
 using HttpMethod = WatsonWebserver.Core.HttpMethod;
 
 namespace Habari.Listeners.Url.Triggers
@@ -13,8 +12,6 @@ namespace Habari.Listeners.Url.Triggers
         public override string Name => "Url get asked";
 
         public override HttpMethod HttpMethod => HttpMethod.GET;
-
-        public Get() : base() { }
 
         public override void HandleException(WorkflowContext context, Exception exception)
         {

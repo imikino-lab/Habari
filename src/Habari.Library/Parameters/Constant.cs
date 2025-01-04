@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Steps;
+using System.Text.Json.Serialization;
 
 namespace Habari.Library.Parameters
 {
@@ -10,9 +11,10 @@ namespace Habari.Library.Parameters
 
         public string Name { get; private set; }
 
-        public IStep Step { get; private set; }
+        [JsonIgnore]
+        public IBase Step { get; private set; }
 
-        public Constant(IStep step, string code, string name, bool isRequired)
+        public Constant(IBase step, string code, string name, bool isRequired)
         {
             Code = code.ToLower();
             IsRequired = isRequired;
