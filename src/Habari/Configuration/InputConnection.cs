@@ -1,9 +1,8 @@
-﻿namespace Habari.Configuration
-{
-    internal class InputConnection
-    {
-        public int Node {  get; set; } = 0;
+﻿namespace Habari.Configuration;
 
-        public string Output { get; set; } = "";
-    }
+internal class InputConnection
+{
+    public int Node {  get; set; } = 0;
+
+    public string Output { get; set; } = "";
 }

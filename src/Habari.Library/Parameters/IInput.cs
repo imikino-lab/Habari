@@ -1,13 +1,12 @@
-﻿namespace Habari.Library.Parameters
+﻿namespace Habari.Library.Parameters;
+
+public interface IInput : IParameter
 {
-    public interface IInput : IParameter
-    {
-        bool IsLinked { get; }
+    bool IsLinked { get; }
 
-        bool IsRequired { get; }
+    bool IsRequired { get; }
 
-        IOutput? Source { get; }
+    IOutput? Source { get; }
 
-        bool Link(IOutput source);
-    }
+    bool Link(IOutput source);
 }

@@ -2,44 +2,43 @@
 using Habari.Library.Steps;
 using IO = System.IO;
 
-namespace Habari.Actions.File
+namespace Habari.Actions.File;
+
+public class Write : Step
 {
-    public class Write : Step
+    public override string Code => "Habari.Action.File.Write";
+
+    [Input("content", "File content", typeof(byte[]), typeof(string))]
+    public Input Content => Inputs["content"];
+
+    public override string Description => "Write the content into a file";
+
+    [Output("fileCreated", "File created", typeof(bool))]
+    public Output FileCreated => Outputs["fileCreated"];
+
+    public override string Name => "File writer";
+
+    [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
+    public Input Path => Inputs["path"];
+
+    [Constant("rootDirectory", "Root directory", ConstantType.Path, true)]
+    public string RootDirectory { get; set; } = "./upload";
+
+    public override async Task RunAsync(WorkflowContext context)
     {
-        public override string Code => "Habari.Action.File.Write";
+        string path = Path.GetValue<string>(context)!;
+        byte[] content = Content.GetValue<byte[]>(context)!;
+        if (path.StartsWith('/'))
+            path = path.Substring(1);
 
-        [Input("content", "File content", typeof(byte[]), typeof(string))]
-        public Input Content => Inputs["content"];
-
-        public override string Description => "Write the content into a file";
-
-        [Output("fileCreated", "File created", typeof(bool))]
-        public Output FileCreated => Outputs["fileCreated"];
-
-        public override string Name => "File writer";
-
-        [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
-        public Input Path => Inputs["path"];
-
-        [Constant("rootDirectory", "Root directory", ConstantType.Path, true)]
-        public string RootDirectory { get; set; } = "./upload";
-
-        public override async Task RunAsync(WorkflowContext context)
+        try
         {
-            string path = Path.GetValue<string>(context)!;
-            byte[] content = Content.GetValue<byte[]>(context)!;
-            if (path.StartsWith('/'))
-                path = path.Substring(1);
-
-            try
-            {
-                await IO.File.WriteAllBytesAsync(IO.Path.Combine(RootDirectory, path), content);
-                FileCreated.SetValue(context, (typeof(bool), true));
-            }
-            catch
-            {
-                FileCreated.SetValue(context, (typeof(bool), false));
-            }
+            await IO.File.WriteAllBytesAsync(IO.Path.Combine(RootDirectory, path), content);
+            FileCreated.SetValue(context, (typeof(bool), true));
+        }
+        catch
+        {
+            FileCreated.SetValue(context, (typeof(bool), false));
         }
     }
 }
