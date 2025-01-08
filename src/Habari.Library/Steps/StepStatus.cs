@@ -1,10 +1,9 @@
-﻿namespace Habari.Library.Steps
+﻿namespace Habari.Library.Steps;
+
+public enum StepStatus
 {
-    public enum StepStatus
-    {
-        Pending,
-        Running,
-        Completed,
-        Failed
-    }
+    Pending,
+    Running,
+    Completed,
+    Failed
 }

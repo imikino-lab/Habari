@@ -1,18 +1,17 @@
-﻿namespace Habari.Library.Parameters
+﻿namespace Habari.Library.Parameters;
+
+public enum ConstantType
 {
-    public enum ConstantType
-    {
-        Text,
-        Integer,
-        Decimal,
-        Email,
-        Date,
-        Time,
-        DateTime,
-        Boolean,
-        List,
-        Phone,
-        Password,
-        Path,
-    }
+    Text,
+    Integer,
+    Decimal,
+    Email,
+    Date,
+    Time,
+    DateTime,
+    Boolean,
+    List,
+    Phone,
+    Password,
+    Path,
 }

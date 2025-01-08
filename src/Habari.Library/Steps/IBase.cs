@@ -1,33 +1,31 @@
-﻿using Habari.Library.Json;
-using Habari.Library.Parameters;
+﻿using Habari.Library.Parameters;
 using System.Text.Json.Nodes;
 
-namespace Habari.Library.Steps
+namespace Habari.Library.Steps;
+
+public interface IBase
 {
-    public interface IBase
-    {
-        int Id { get; }
+    int Id { get; }
 
-        string Code { get; }
+    string Code { get; }
 
-        Constants Constants { get; }
+    Constants Constants { get; }
 
-        string Description { get; }
+    string Description { get; }
 
-        Inputs Inputs { get; }
+    Inputs Inputs { get; }
 
-        string Name { get; }
+    string Name { get; }
 
-        Outputs Outputs { get; }
+    Outputs Outputs { get; }
 
-        StepStatus Status { get; }
+    StepStatus Status { get; }
 
-        float X { get; set; }
+    float X { get; set; }
 
-        float Y { get; set; }
+    float Y { get; set; }
 
-        void Load(JsonObject config);
+    void Load(JsonObject config);
 
-        Task RunAsync(WorkflowContext context);
-    }
+    Task RunAsync(WorkflowContext context);
 }

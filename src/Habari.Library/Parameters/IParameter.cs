@@ -1,23 +1,22 @@
 ﻿using Habari.Library.Json;
 using Habari.Library.Steps;
 
-namespace Habari.Library.Parameters
+namespace Habari.Library.Parameters;
+
+[InterfaceJsonConverter(typeof(InterfaceJsonConverter<IParameter>))]
+public interface IParameter
 {
-    [InterfaceJsonConverter(typeof(InterfaceJsonConverter<IParameter>))]
-    public interface IParameter
-    {
-        string Code { get; }
+    string Code { get; }
 
-        string Name { get; }
+    string Name { get; }
 
-        IBase Step { get; }
+    IBase Step { get; }
 
-        Type[] Types { get; }
+    Type[] Types { get; }
 
-        string ContextKey { get; }
+    string ContextKey { get; }
 
-        public T? GetValue<T>(WorkflowContext context);
+    public T? GetValue<T>(WorkflowContext context);
 
-        public void SetValue(WorkflowContext context, params (Type, object?)[] values);
-    }
+    public void SetValue(WorkflowContext context, params (Type, object?)[] values);
 }

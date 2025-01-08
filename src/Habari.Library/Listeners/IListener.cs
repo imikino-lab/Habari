@@ -3,31 +3,30 @@ using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
-namespace Habari.Library.Listeners
+namespace Habari.Library.Listeners;
+
+[InterfaceJsonConverter(typeof(InterfaceJsonConverter<IListener>))]
+public interface IListener
 {
-    [InterfaceJsonConverter(typeof(InterfaceJsonConverter<IListener>))]
-    public interface IListener
-    {
-        string Code { get; }
+    string Code { get; }
 
-        string Description { get; }
+    string Description { get; }
 
-        string Name { get; }
+    string Name { get; }
 
-        List<ITrigger> Triggers { get; }
+    List<ITrigger> Triggers { get; }
 
-        int X { get; set; }
+    int X { get; set; }
 
-        int Y { get; set; }
+    int Y { get; set; }
 
-        Constants Values { get; }
+    Constants Values { get; }
 
-        void Load(JsonObject config);
+    void Load(JsonObject config);
 
-        void LoadTrigger(JsonObject config);
+    void LoadTrigger(JsonObject config);
 
-        void Start(WorkflowContext context);
+    void Start(WorkflowContext context);
 
-        void Stop();
-    }
+    void Stop();
 }

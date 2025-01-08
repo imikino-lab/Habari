@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Habari.Library.Json
+namespace Habari.Library.Json;
+
+[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+internal class InterfaceJsonConverterAttribute : JsonConverterAttribute
 {
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-    internal class InterfaceJsonConverterAttribute : JsonConverterAttribute
+    public InterfaceJsonConverterAttribute(Type converterType)
+    : base(converterType)
     {
-        public InterfaceJsonConverterAttribute(Type converterType)
-        : base(converterType)
-        {
-        }
     }
 }

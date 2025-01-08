@@ -3,101 +3,99 @@ using Habari.Library.Workflows;
 using Microsoft.Extensions.Logging;
 using System.Resources;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using WatsonWebserver;
 using WatsonWebserver.Core;
 using HttpMethod = WatsonWebserver.Core.HttpMethod;
 
-namespace Habari.Configuration
+namespace Habari.Configuration;
+
+internal class WorkflowConfiguration
 {
-    internal class WorkflowConfiguration
+    private ILogger? _logger { get; set; }
+
+    private Webserver? _webserver { get; set; } = null;
+
+    public WorkflowConfiguration(ILogger logger)
     {
-        private ILogger? _logger { get; set; }
+        _logger = logger;
+    }
 
-        private Webserver? _webserver { get; set; } = null;
+    public void Start()
+    {
+        ResourceManager resourceManager = new ("Habari.Properties.Configuration", typeof(WorkflowConfiguration).Assembly);
 
-        public WorkflowConfiguration(ILogger logger)
+        WebserverSettings webserverSettings = new ("127.0.0.1", ConfigurationManager.Instance.ConfigurationPort, false);
+        byte[]? indexHtml = (byte[]?)resourceManager.GetObject("index.html");
+        byte[]? habariCss = (byte[]?)resourceManager.GetObject("habari.css");
+        byte[]? robotoCss = (byte[]?)resourceManager.GetObject("roboto.css");
+        byte[]? robotoWoff2 = (byte[]?)resourceManager.GetObject("roboto.woff2");
+        byte[]? drawflowMinCss = (byte[]?)resourceManager.GetObject("drawflow.min.css");
+        byte[]? drawflowMinJs = (byte[]?)resourceManager.GetObject("drawflow.min.js");
+        byte[]? sweetalert2Js = (byte[]?)resourceManager.GetObject("sweetalert2.js");
+        byte[]? drawflowStyleJs = (byte[]?)resourceManager.GetObject("drawflow.style.js");
+
+        _webserver = new (webserverSettings, async (HttpContextBase contextBase) =>
         {
-            _logger = logger;
-        }
+            await contextBase.Response.Send(indexHtml); 
+        });
 
-        public void Start()
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/drawflow.min.css", async (HttpContextBase contextBase) =>
         {
-            ResourceManager resourceManager = new ("Habari.Properties.Configuration", typeof(WorkflowConfiguration).Assembly);
+            await contextBase.Response.Send(drawflowMinCss);
+        });
 
-            WebserverSettings webserverSettings = new ("127.0.0.1", ConfigurationManager.Instance.ConfigurationPort, false);
-            byte[]? indexHtml = (byte[]?)resourceManager.GetObject("index.html");
-            byte[]? habariCss = (byte[]?)resourceManager.GetObject("habari.css");
-            byte[]? robotoCss = (byte[]?)resourceManager.GetObject("roboto.css");
-            byte[]? robotoWoff2 = (byte[]?)resourceManager.GetObject("roboto.woff2");
-            byte[]? drawflowMinCss = (byte[]?)resourceManager.GetObject("drawflow.min.css");
-            byte[]? drawflowMinJs = (byte[]?)resourceManager.GetObject("drawflow.min.js");
-            byte[]? sweetalert2Js = (byte[]?)resourceManager.GetObject("sweetalert2.js");
-            byte[]? drawflowStyleJs = (byte[]?)resourceManager.GetObject("drawflow.style.js");
-
-            _webserver = new (webserverSettings, async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(indexHtml); 
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/drawflow.min.css", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(drawflowMinCss);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/roboto.css", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(robotoCss);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/habari.css", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(habariCss);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/font/roboto.woff2", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(robotoWoff2);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/drawflow.min.js", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(drawflowMinJs);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/sweetalert2.js", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(sweetalert2Js);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/drawflow.style.js", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(drawflowStyleJs);
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/workflows", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(JsonSerializer.Serialize(value: ConfigurationManager.Instance.Workflows.Select(workflow => new KeyValuePair<string, Workflow>(workflow.Key, workflow.Value)).ToDictionary()));
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/listeners", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableListeners.Values.Select(value => Activator.CreateInstance(value) as Library.Listeners.Listener)));
-            });
-
-            _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/steps", async (HttpContextBase contextBase) =>
-            {
-                await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableSteps.Values.Select(value => Activator.CreateInstance(value) as Library.Steps.Step)));
-            });
-
-            _webserver.Start();
-        }
-
-        public void Stop()
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/roboto.css", async (HttpContextBase contextBase) =>
         {
-            _webserver!.Stop();
-            _webserver = null;
-            GC.Collect();
-        }
+            await contextBase.Response.Send(robotoCss);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/css/habari.css", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(habariCss);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/font/roboto.woff2", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(robotoWoff2);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/drawflow.min.js", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(drawflowMinJs);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/sweetalert2.js", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(sweetalert2Js);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/js/drawflow.style.js", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(drawflowStyleJs);
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/workflows", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(JsonSerializer.Serialize(value: ConfigurationManager.Instance.Workflows.Select(workflow => new KeyValuePair<string, Workflow>(workflow.Key, workflow.Value)).ToDictionary()));
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/listeners", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableListeners.Values.Select(value => Activator.CreateInstance(value) as Library.Listeners.Listener)));
+        });
+
+        _webserver.Routes.PreAuthentication.Parameter.Add(HttpMethod.GET, "/api/steps", async (HttpContextBase contextBase) =>
+        {
+            await contextBase.Response.Send(JsonSerializer.Serialize(ConfigurationManager.Instance.AvailableSteps.Values.Select(value => Activator.CreateInstance(value) as Library.Steps.Step)));
+        });
+
+        _webserver.Start();
+    }
+
+    public void Stop()
+    {
+        _webserver!.Stop();
+        _webserver = null;
+        GC.Collect();
     }
 }
