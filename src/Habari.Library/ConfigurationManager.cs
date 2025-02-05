@@ -25,6 +25,8 @@ public sealed class ConfigurationManager
 
     public Dictionary<string, Workflow> Workflows { get; private set; } = new();
 
+    public string WorkflowsDirectory { get; private set; } = string.Empty;
+
     private ConfigurationManager()
     {
         ILoggerFactory loggerFactory = LoggerFactory.Create(
@@ -106,9 +108,9 @@ public sealed class ConfigurationManager
 
         if (config!["workflowsDirectory"] != null)
         {
-            string directory = config!["workflowsDirectory"]!.AsValue().ToString();
-            Directory.CreateDirectory(directory);
-            foreach (string workflowFilename in Directory.GetFiles(directory))
+            WorkflowsDirectory = config!["workflowsDirectory"]!.AsValue().ToString();
+            Directory.CreateDirectory(WorkflowsDirectory);
+            foreach (string workflowFilename in Directory.GetFiles(WorkflowsDirectory))
             {
                 JsonNode? workflowConfig = JsonNode.Parse(File.ReadAllText(workflowFilename));
                 string listenerCode = workflowConfig!["code"]!.AsValue().GetValue<string>();

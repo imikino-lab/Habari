@@ -12,17 +12,21 @@ public class Output : IOutput
     [JsonIgnore]
     public IBase Step { get; private set; }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public ParameterType Type { get; private set; }
+
     [JsonIgnore]
     public Type[] Types { get; private set; }
 
     [JsonIgnore]
     public string ContextKey => $"{Step.Code}.{Step.Id}.Output.{Code}";
 
-    public Output(IBase step, string code, string name, params Type[] types)
+    public Output(IBase step, string code, string name, ParameterType type, params Type[] types)
     {
-        Code = code.ToLower();
+        Code = code;
         Name = name;
         Step = step;
+        Type = type;
         Types = types;
     }
 

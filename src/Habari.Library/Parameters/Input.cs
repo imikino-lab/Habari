@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Steps;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Habari.Library.Parameters;
@@ -23,15 +24,19 @@ public class Input : IInput
     [JsonIgnore]
     public IBase Step { get; private set; }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public ParameterType Type { get; private set; }
+
     [JsonIgnore]
     public Type[] Types { get; private set; }
 
-    public Input(IBase step, string code, string name, bool isRequired, params Type[] types)
+    public Input(IBase step, string code, string name, ParameterType type, bool isRequired, params Type[] types)
     {
-        Code = code.ToLower();
+        Code = code;
         IsRequired = isRequired;
         Name = name;
         Step = step;
+        Type = type;
         Types = types;
     }
 

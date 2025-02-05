@@ -16,7 +16,6 @@ public class Constants
         return constants;
     }
 
-
     private Dictionary<string, Constant> _innerDictionary = new();
 
     public Constant this[string key]

@@ -7,12 +7,15 @@ public sealed class OutputAttribute : Attribute
 
     public string Name { get; private set; }
 
+    public ParameterType ParameterType { get; private set; }
+
     public Type[] Types { get; private set; }
 
-    public OutputAttribute(string code, string name, params Type[] types)
+    public OutputAttribute(string code, string name, ParameterType parameterType, params Type[] types)
     {
         Code = code;
         Name = name;
+        ParameterType = parameterType;
         Types = types;
     }
 }

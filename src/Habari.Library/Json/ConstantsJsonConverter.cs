@@ -33,7 +33,7 @@ internal class ConstantsJsonConverter : JsonConverter<Constants>
     public override void Write(Utf8JsonWriter writer, Constants constants, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        foreach (var constant in constants)
+        foreach (var constant in constants.Values.OrderBy(item => item.Name))
         {
             JsonSerializer.Serialize(writer, constant, options);
         }

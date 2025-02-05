@@ -11,13 +11,13 @@ public class Or : Step
 
     public override string Name => "Logical or";
 
-    [Input("op1", "Operator 1", true, typeof(bool))]
+    [Input("op1", "Operator 1", ParameterType.Boolean, true, typeof(bool))]
     public Input Operator1 => Inputs["op1"];
 
-    [Input("op2", "Operator 2", true, typeof(bool))]
+    [Input("op2", "Operator 2", ParameterType.Boolean, true, typeof(bool))]
     public Input Operator2 => Inputs["op2"];
 
-    [Output("result", "Or operation result", typeof(bool))]
+    [Output("result", "Result", ParameterType.Boolean, typeof(bool))]
     public Output Result => Outputs["result"];
 
     public override Task RunAsync(WorkflowContext context)

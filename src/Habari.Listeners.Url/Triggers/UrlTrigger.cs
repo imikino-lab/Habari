@@ -7,13 +7,13 @@ namespace Habari.Listeners.Url.Triggers;
 
 public abstract class UrlTrigger : Trigger
 {
-    [Output("context", "Current web context", typeof(HttpContextBase))]
+    [Output("context", "Web context", ParameterType.Context, typeof(HttpContextBase))]
     public Output Context => Outputs["context"];
 
     public abstract HttpMethod HttpMethod { get; }
 
     public string Route { get; set; } = "/";
 
-    [Output("path", "Asked path", typeof(byte[]), typeof(string))]
+    [Output("path", "Asked path", ParameterType.Path, typeof(byte[]), typeof(string))]
     public Output Path => Outputs["path"];
 }

@@ -31,6 +31,7 @@ public class Workflow
     public void Load(JsonObject configuration)
     {
         Listener?.Load(configuration);
+        Listener?.Triggers.Clear();
         foreach (JsonNode? triggerConfig in configuration!["triggers"]!.AsArray())
         {
             Listener?.LoadTrigger(triggerConfig!.AsObject());

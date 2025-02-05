@@ -33,7 +33,7 @@ internal class InputsJsonConverter : JsonConverter<Inputs>
     public override void Write(Utf8JsonWriter writer, Inputs inputs, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        foreach (var input in inputs)
+        foreach (var input in inputs.Values.OrderBy(item => item.Name))
         {
             JsonSerializer.Serialize(writer, input, options);
         }

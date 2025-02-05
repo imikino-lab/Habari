@@ -14,7 +14,7 @@ public class Ask : Listener
 
     public override string Description => "Occurs when a url is asked";
 
-    public Get DefaultGet { get; private set; } = new ();
+    //public Get DefaultGet { get; private set; } = new ();
 
     public string DefaultPageName { get; set; } = "index.html";
 
@@ -30,6 +30,7 @@ public class Ask : Listener
 
     public Ask()
     {
+        Triggers.Add(new Get());
     }
 
     public override void Load(JsonObject config)
@@ -38,7 +39,7 @@ public class Ask : Listener
         Host = config["host"]!.GetValue<string>();
         Port = config["port"]!.GetValue<int>();
         Ssl = config["ssl"]!.GetValue<bool>();
-        DefaultGet.Load(config["defaultGet"]!.AsObject());
+//        DefaultGet.Load(config["defaultGet"]!.AsObject());
     }
 
     public override void LoadTrigger(JsonObject config)
@@ -61,10 +62,10 @@ public class Ask : Listener
         WebserverSettings webserverSettings = new (Host, Port, Ssl);
         Webserver = new (webserverSettings, async (HttpContextBase contextBase) =>
         {
-            await RunRoute(contextBase, context, DefaultGet);
+            await RunRoute(contextBase, context, (UrlTrigger)Triggers.First());
         });
 
-        foreach (IStep trigger in Triggers)
+        foreach (IStep trigger in Triggers.Skip(1))
         {
             UrlTrigger urlTrigger = (UrlTrigger)trigger;
             Webserver.Routes.PreAuthentication.Parameter.Add(urlTrigger.HttpMethod, urlTrigger.Route, async (HttpContextBase contextBase) =>

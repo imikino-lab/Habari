@@ -9,15 +9,15 @@ public sealed class ConstantAttribute : Attribute
 
     public string Name { get; private set; }
 
-    public ConstantType Type { get; set; }
+    public ParameterType ParameterType { get; set; }
 
-    public ConstantAttribute(string code, string name, ConstantType type) : this(code, name, type, false) { }
+    public ConstantAttribute(string code, string name, ParameterType parameterType) : this(code, name, parameterType, false) { }
 
-    public ConstantAttribute(string code, string name, ConstantType type, bool isRequired)
+    public ConstantAttribute(string code, string name, ParameterType parameterType, bool isRequired)
     {
         Code = code;
         IsRequired = isRequired;
         Name = name;
-        Type = type;
+        ParameterType = parameterType;
     }
 }

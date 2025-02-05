@@ -9,20 +9,20 @@ public class Read : Step
 {
     public override string Code => "Habari.Action.File.Read";
 
-    [Output("content", "File content", typeof(byte[]), typeof(string))]
+    [Output("content", "File content", ParameterType.Text, typeof(byte[]), typeof(string))]
     public Output Content => Outputs["content"];
 
     public override string Description => "Read the content of a file";
 
-    [Output("fileFound", "File found", typeof(bool))]
+    [Output("fileFound", "File found", ParameterType.Boolean, typeof(bool))]
     public Output FileFound => Outputs["fileFound"];
 
     public override string Name => "File reader";
 
-    [Input("path", "Asked path", true, typeof(byte[]), typeof(string))]
+    [Input("path", "Asked path", ParameterType.Path, true, typeof(byte[]), typeof(string))]
     public Input Path => Inputs["path"];
 
-    [Constant("rootDirectory", "Root directory", ConstantType.Path, true)]
+    [Constant("rootDirectory", "Root directory", ParameterType.Path, true)]
     public string RootDirectory { get; set; } = "./www";
 
     public override async Task RunAsync(WorkflowContext context)

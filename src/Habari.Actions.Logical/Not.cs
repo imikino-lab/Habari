@@ -11,10 +11,10 @@ public class Not : Step
 
     public override string Name => "Logical not";
 
-    [Input("op", "Operator", true, typeof(bool))]
+    [Input("op", "Operator", ParameterType.Boolean, true, typeof(bool))]
     public Input Operator => Inputs["op"];
 
-    [Output("result", "Not operation result", typeof(bool))]
+    [Output("result", "Result", ParameterType.Boolean, typeof(bool))]
     public Output Result => Outputs["result"];
 
     public override Task RunAsync(WorkflowContext context)

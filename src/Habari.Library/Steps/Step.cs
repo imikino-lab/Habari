@@ -1,5 +1,7 @@
 ﻿using Habari.Library.Json;
 using Habari.Library.Parameters;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -22,14 +24,19 @@ public abstract class Step : IStep
 
     public abstract string Name { get; }
 
+    public StepStatus Status { get; protected set; }
+
     [JsonConverter(typeof(OutputsJsonConverter))]
     public Outputs Outputs { get; } = new();
+
+    /*
+    [Input("workflow", "Workflow", true, typeof(bool))]
+    public Input Workflow => Inputs["workflow"];
+    */
 
     public float X { get; set; }
 
     public float Y { get; set; }
-
-    public StepStatus Status { get; protected set; }
 
     public Step()
     {
@@ -52,7 +59,7 @@ public abstract class Step : IStep
         foreach (var property in properties)
         {
             var attribute = (ConstantAttribute)property.GetCustomAttributes(typeof(ConstantAttribute), false).First();
-            Constants.Add(new Constant(this, attribute.Code, attribute.Name, attribute.IsRequired));
+            Constants.Add(new Constant(this, attribute.Code, attribute.Name, attribute.ParameterType, attribute.IsRequired));
         }
     }
 
@@ -62,7 +69,7 @@ public abstract class Step : IStep
         foreach (var property in properties)
         {
             var attribute = (InputAttribute)property.GetCustomAttributes(typeof(InputAttribute), false).First();
-            Inputs.Add(new Input(this, attribute.Code, attribute.Name, attribute.IsRequired, attribute.Types));
+            Inputs.Add(new Input(this, attribute.Code, attribute.Name, attribute.ParameterType, attribute.IsRequired, attribute.Types));
         }
     }
 
@@ -72,7 +79,7 @@ public abstract class Step : IStep
         foreach (var property in properties)
         {
             var attribute = (OutputAttribute)property.GetCustomAttributes(typeof(OutputAttribute), false).First();
-            Outputs.Add(new Output(this, attribute.Code, attribute.Name, attribute.Types));
+            Outputs.Add(new Output(this, attribute.Code, attribute.Name, attribute.ParameterType, attribute.Types));
         }
     }
 
