@@ -47,7 +47,7 @@ public class Ask : Listener
         string code = config["code"]!.GetValue<string>();
         switch (code.ToLowerInvariant())
         {
-            case "get":
+            case "habari.listener.url.ask.get":
                 Get get = new Get();
                 get.Load(config);
                 Triggers.Add(get);
