@@ -1,4 +1,5 @@
-﻿using Habari.Library.Json;
+﻿using Habari.Library.Base;
+using Habari.Library.Json;
 using Habari.Library.Parameters;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -25,9 +26,9 @@ public abstract class Trigger : ITrigger
     [JsonConverter(typeof(OutputsJsonConverter))]
     public Outputs Outputs { get; } = new();
 
-    public float X { get; set; }
+    public int X { get; set; }
 
-    public float Y { get; set; }
+    public int Y { get; set; }
 
     public StepStatus Status { get; protected set; }
 
@@ -108,8 +109,8 @@ public abstract class Trigger : ITrigger
     public void Load(JsonObject config)
     {
         Id = config["id"]!.GetValue<int>();
-        X = config["x"]!.GetValue<float>();
-        Y = config["y"]!.GetValue<float>();
+        X = config["x"]!.GetValue<int>();
+        Y = config["y"]!.GetValue<int>();
         LoadConstants(config);
         LoadStepsAndRelations(config);
     }

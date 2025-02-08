@@ -10,10 +10,12 @@ public enum ParameterType
     Decimal,
     Email,
     Integer,
+    IPAddress,
     List,
     Password,
     Path,
     Phone,
+    String,
     Text,
     Time,
 }

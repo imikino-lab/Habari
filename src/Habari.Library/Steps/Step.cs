@@ -29,14 +29,9 @@ public abstract class Step : IStep
     [JsonConverter(typeof(OutputsJsonConverter))]
     public Outputs Outputs { get; } = new();
 
-    /*
-    [Input("workflow", "Workflow", true, typeof(bool))]
-    public Input Workflow => Inputs["workflow"];
-    */
+    public int X { get; set; }
 
-    public float X { get; set; }
-
-    public float Y { get; set; }
+    public int Y { get; set; }
 
     public Step()
     {
@@ -48,8 +43,8 @@ public abstract class Step : IStep
     public void Load(JsonObject config)
     {
         Id = config["id"]!.GetValue<int>();
-        X = config["x"]!.GetValue<float>();
-        Y = config["y"]!.GetValue<float>();
+        X = config["x"]!.GetValue<int>();
+        Y = config["y"]!.GetValue<int>();
         LoadConstants(config);
     }
 

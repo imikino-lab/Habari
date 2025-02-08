@@ -86,6 +86,10 @@ html, body {
         background-color: #db3434;
     }
 
+    .parameteranchor.String {
+        background-color: #34db98;
+    }
+
     .parameteranchor.Text {
         background-color: #34db98;
     }
@@ -155,6 +159,10 @@ html, body {
 
     .parameterpath.Path {
         stroke: #db3434;
+    }
+
+    .parameterpath.String {
+        stroke: #34db98;
     }
 
     .parameterpath.Text {

@@ -11,7 +11,7 @@ public class Select : Step
 {
     public override string Code => "Habari.Action.Database.Select";
 
-    [Output("content", "File content", ParameterType.Text, typeof(byte[]), typeof(string))]
+    [Output("content", "File content", ParameterType.String, typeof(byte[]), typeof(string))]
     public Output Content => Outputs["content"];
 
     [Input("dataSource", "Data source", ParameterType.DatabaseConnection, true, typeof(DbDataSource))]
@@ -21,7 +21,7 @@ public class Select : Step
 
     public override string Name => "Describe object";
 
-    [Input("objectName", "Object Name", ParameterType.Text, true, typeof(byte[]), typeof(string))]
+    [Input("objectName", "Object Name", ParameterType.String, true, typeof(byte[]), typeof(string))]
     public Input ObjectName => Inputs["objectName"];
 
     public override Task RunAsync(WorkflowContext context)

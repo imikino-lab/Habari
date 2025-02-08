@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Listeners;
+using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using Habari.Listeners.Url.Triggers;
 using System.Text;
@@ -16,14 +17,18 @@ public class Ask : Listener
 
     //public Get DefaultGet { get; private set; } = new ();
 
+    [Constant("defaultPageName", "Default page name", ParameterType.String, true)]
     public string DefaultPageName { get; set; } = "index.html";
 
     public override string Name => "Url asked";
 
+    [Constant("host", "Host", ParameterType.IPAddress, true)]
     public string Host { get; set; } = "127.0.0.1";
 
+    [Constant("port", "Port", ParameterType.Integer, true)]
     public int Port { get; set; } = 80;
 
+    [Constant("ssl", "Ssl", ParameterType.Boolean, true)]
     public bool Ssl { get; set; }
 
     private Webserver? Webserver { get; set; } = null;
@@ -39,7 +44,6 @@ public class Ask : Listener
         Host = config["host"]!.GetValue<string>();
         Port = config["port"]!.GetValue<int>();
         Ssl = config["ssl"]!.GetValue<bool>();
-//        DefaultGet.Load(config["defaultGet"]!.AsObject());
     }
 
     public override void LoadTrigger(JsonObject config)

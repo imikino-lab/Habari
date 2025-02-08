@@ -1,7 +1,8 @@
 ﻿using Habari.Library.Parameters;
+using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
-namespace Habari.Library.Steps;
+namespace Habari.Library.Base;
 
 public interface IBase
 {
@@ -21,9 +22,9 @@ public interface IBase
 
     StepStatus Status { get; }
 
-    float X { get; set; }
+    int X { get; set; }
 
-    float Y { get; set; }
+    int Y { get; set; }
 
     void Load(JsonObject config);
 
