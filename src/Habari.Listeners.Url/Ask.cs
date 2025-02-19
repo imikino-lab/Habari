@@ -1,4 +1,4 @@
-﻿using Habari.Library.Listeners;
+﻿using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using Habari.Listeners.Url.Triggers;
 using System.Text;
@@ -14,22 +14,25 @@ public class Ask : Listener
 
     public override string Description => "Occurs when a url is asked";
 
-    public Get DefaultGet { get; private set; } = new ();
-
+    [Constant("defaultPageName", "Default page name", ParameterType.String, true)]
     public string DefaultPageName { get; set; } = "index.html";
 
     public override string Name => "Url asked";
 
+    [Constant("host", "Host", ParameterType.IPAddress, true)]
     public string Host { get; set; } = "127.0.0.1";
 
+    [Constant("port", "Port", ParameterType.Integer, true)]
     public int Port { get; set; } = 80;
 
+    [Constant("ssl", "Ssl", ParameterType.Boolean, true)]
     public bool Ssl { get; set; }
 
     private Webserver? Webserver { get; set; } = null;
 
     public Ask()
     {
+        Triggers.Add(new Get());
     }
 
     public override void Load(JsonObject config)
@@ -38,7 +41,6 @@ public class Ask : Listener
         Host = config["host"]!.GetValue<string>();
         Port = config["port"]!.GetValue<int>();
         Ssl = config["ssl"]!.GetValue<bool>();
-        DefaultGet.Load(config["defaultGet"]!.AsObject());
     }
 
     public override void LoadTrigger(JsonObject config)
@@ -46,7 +48,7 @@ public class Ask : Listener
         string code = config["code"]!.GetValue<string>();
         switch (code.ToLowerInvariant())
         {
-            case "get":
+            case "habari.listener.url.ask.get":
                 Get get = new Get();
                 get.Load(config);
                 Triggers.Add(get);
@@ -61,10 +63,10 @@ public class Ask : Listener
         WebserverSettings webserverSettings = new (Host, Port, Ssl);
         Webserver = new (webserverSettings, async (HttpContextBase contextBase) =>
         {
-            await RunRoute(contextBase, context, DefaultGet);
+            await RunRoute(contextBase, context, (UrlTrigger)Triggers.First());
         });
 
-        foreach (IStep trigger in Triggers)
+        foreach (IStep trigger in Triggers.Skip(1))
         {
             UrlTrigger urlTrigger = (UrlTrigger)trigger;
             Webserver.Routes.PreAuthentication.Parameter.Add(urlTrigger.HttpMethod, urlTrigger.Route, async (HttpContextBase contextBase) =>

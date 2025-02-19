@@ -1,5 +1,4 @@
-﻿using Habari.Library.Listeners;
-using Habari.Library.Steps;
+﻿using Habari.Library.Steps;
 using Habari.Library.Workflows;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -24,6 +23,8 @@ public sealed class ConfigurationManager
     public static ConfigurationManager Instance { get => configurationManager.Value; }
 
     public Dictionary<string, Workflow> Workflows { get; private set; } = new();
+
+    public string WorkflowsDirectory { get; private set; } = string.Empty;
 
     private ConfigurationManager()
     {
@@ -106,9 +107,9 @@ public sealed class ConfigurationManager
 
         if (config!["workflowsDirectory"] != null)
         {
-            string directory = config!["workflowsDirectory"]!.AsValue().ToString();
-            Directory.CreateDirectory(directory);
-            foreach (string workflowFilename in Directory.GetFiles(directory))
+            WorkflowsDirectory = config!["workflowsDirectory"]!.AsValue().ToString();
+            Directory.CreateDirectory(WorkflowsDirectory);
+            foreach (string workflowFilename in Directory.GetFiles(WorkflowsDirectory))
             {
                 JsonNode? workflowConfig = JsonNode.Parse(File.ReadAllText(workflowFilename));
                 string listenerCode = workflowConfig!["code"]!.AsValue().GetValue<string>();

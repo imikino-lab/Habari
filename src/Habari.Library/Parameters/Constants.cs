@@ -4,19 +4,6 @@ namespace Habari.Library.Parameters;
 
 public class Constants
 {
-    public static Constants From(IStep step)
-    {
-        Constants constants = new();
-        /*
-        foreach (IConfigurationParameter input in step.GetType().Attributes.Where(attribute => attribute.))
-        {
-            configurationParameters.Add(new ConfigurationParameter(step, input.Code, input.Name, input.IsRequired, input.Types));
-        }
-        */
-        return constants;
-    }
-
-
     private Dictionary<string, Constant> _innerDictionary = new();
 
     public Constant this[string key]

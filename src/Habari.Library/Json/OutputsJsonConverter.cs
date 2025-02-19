@@ -1,4 +1,5 @@
 ﻿using Habari.Library.Parameters;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -33,7 +34,7 @@ internal class OutputsJsonConverter : JsonConverter<Outputs>
     public override void Write(Utf8JsonWriter writer, Outputs outputs, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        foreach (var output in outputs)
+        foreach (var output in outputs.Values.OrderBy(item => item.Name))
         {
             JsonSerializer.Serialize(writer, output, options);
         }

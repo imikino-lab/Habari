@@ -12,7 +12,7 @@ internal class Listener
             return;
         }
 
-        var element = Activator.CreateInstance(type) as Library.Listeners.Listener;
+        var element = Activator.CreateInstance(type) as Library.Steps.Listener;
         if (element != null)
         {
             Code = element.Code;

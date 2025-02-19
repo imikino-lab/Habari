@@ -5,7 +5,7 @@ namespace Habari.Listeners.Url.Triggers;
 
 public class Get : UrlTrigger
 {
-    public override string Code => "Get";
+    public override string Code => "Habari.Listener.Url.Ask.Get";
 
     public override string Description => "Occurs when a url is asked with the REST method GET";
 

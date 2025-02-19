@@ -8,13 +8,13 @@ public class Write : Step
 {
     public override string Code => "Habari.Action.Url.Write";
 
-    [Input("content", "File content", true, typeof(byte[]), typeof(string))]
+    [Input("content", "File content", ParameterType.Text, true, typeof(byte[]), typeof(string))]
     public Input Content => Inputs["content"];
 
-    [Input("contentNotFound", "Content not found", true, typeof(bool))]
+    [Input("contentNotFound", "Content not found", ParameterType.Boolean, true, typeof(bool))]
     public Input ContentNotFound => Inputs["contentNotFound"];
 
-    [Input("context", "Current web context", true, typeof(HttpContextBase))]
+    [Input("context", "Web context", ParameterType.Context, true, typeof(HttpContextBase))]
     public Input Context => Inputs["context"];
 
     public override string Description => "Write the content of a file";

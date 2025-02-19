@@ -1,5 +1,4 @@
-﻿using Habari.Library.Listeners;
-using Habari.Library.Steps;
+﻿using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
 namespace Habari.Library.Workflows;
@@ -31,6 +30,7 @@ public class Workflow
     public void Load(JsonObject configuration)
     {
         Listener?.Load(configuration);
+        Listener?.Triggers.Clear();
         foreach (JsonNode? triggerConfig in configuration!["triggers"]!.AsArray())
         {
             Listener?.LoadTrigger(triggerConfig!.AsObject());
