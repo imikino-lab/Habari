@@ -1,5 +1,4 @@
-﻿using Habari.Library.Base;
-using Habari.Library.Steps;
+﻿using Habari.Library.Steps;
 using System.Text.Json.Serialization;
 
 namespace Habari.Library.Parameters;
@@ -22,7 +21,7 @@ public class Constant : IConstant
     public IOutput? Source { get; private set; }
 
     [JsonIgnore]
-    public IBase Step { get; private set; }
+    public IRoot Step { get; private set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ParameterType Type { get; private set; }
@@ -30,7 +29,7 @@ public class Constant : IConstant
     [JsonIgnore]
     public Type[] Types { get; private set; }
 
-    public Constant(IBase step, string code, string name, ParameterType type, bool isRequired, params Type[] types)
+    public Constant(IRoot step, string code, string name, ParameterType type, bool isRequired, params Type[] types)
     {
         Code = code;
         IsRequired = isRequired;
@@ -43,17 +42,6 @@ public class Constant : IConstant
     public T? GetValue<T>(WorkflowContext context)
     {
         return (T?)context.Get((Source?.Code ?? Code), typeof(T));
-    }
-
-    public bool Link(IOutput source)
-    {
-        bool result = false;
-        if (source.Types.Any(type => Types.Contains(type)))
-        {
-            Source = source;
-            result = true;
-        }
-        return result;
     }
 
     public void SetValue(WorkflowContext context, params (Type, object?)[] values)

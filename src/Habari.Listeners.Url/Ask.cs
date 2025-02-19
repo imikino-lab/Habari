@@ -1,5 +1,4 @@
-﻿using Habari.Library.Listeners;
-using Habari.Library.Parameters;
+﻿using Habari.Library.Parameters;
 using Habari.Library.Steps;
 using Habari.Listeners.Url.Triggers;
 using System.Text;
@@ -14,8 +13,6 @@ public class Ask : Listener
     public override string Code => "Habari.Listener.Url.Ask";
 
     public override string Description => "Occurs when a url is asked";
-
-    //public Get DefaultGet { get; private set; } = new ();
 
     [Constant("defaultPageName", "Default page name", ParameterType.String, true)]
     public string DefaultPageName { get; set; } = "index.html";

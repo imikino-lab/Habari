@@ -1,7 +1,5 @@
 ﻿using Habari.Library.Json;
 using Habari.Library.Parameters;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -19,6 +17,8 @@ public abstract class Step : IStep
 
     public abstract string Description { get; }
 
+    public int Height { get; set; }
+
     [JsonConverter(typeof(InputsJsonConverter))]
     public Inputs Inputs { get; } = new();
 
@@ -28,6 +28,8 @@ public abstract class Step : IStep
 
     [JsonConverter(typeof(OutputsJsonConverter))]
     public Outputs Outputs { get; } = new();
+
+    public int Width { get; set; }
 
     public int X { get; set; }
 

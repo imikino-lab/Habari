@@ -1,32 +1,25 @@
 ﻿using Habari.Library.Parameters;
-using Habari.Library.Steps;
 using System.Text.Json.Nodes;
 
-namespace Habari.Library.Base;
+namespace Habari.Library.Steps;
 
-public interface IBase
+public interface IRoot
 {
-    int Id { get; }
-
     string Code { get; }
 
     Constants Constants { get; }
 
     string Description { get; }
 
-    Inputs Inputs { get; }
+    int Height { get; set; }
 
     string Name { get; }
 
-    Outputs Outputs { get; }
-
-    StepStatus Status { get; }
+    int Width { get; set; }
 
     int X { get; set; }
 
     int Y { get; set; }
 
     void Load(JsonObject config);
-
-    Task RunAsync(WorkflowContext context);
 }

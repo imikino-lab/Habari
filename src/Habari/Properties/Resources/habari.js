@@ -3,9 +3,11 @@ let canvasRect = null;
 let connections = null;
 let connectionsRect = null;
 let currentDragStep = null;
+let currentDragResizer = null;
 let currentDragPath = null;
 let currentDragFrom = null;
 let currentDragTo = null;
+let tabs = null;
 
 var stepsList;
 var listenersList;
@@ -64,31 +66,43 @@ function getWorkflows() {
             }
         }).then(data => {
             workflowsList = data;
-            workflowsList['ask'].triggers.forEach((trigger) => {
-                createTrigger(trigger);
-                createSteps(trigger.steps);
-                createRelations(trigger.relations);
-            });
+            createTabs();
         });
 }
 
+function createTabs() {
+    Object.entries(workflowsList).forEach(([key, _]) => {
+        const tab = document.createElement('div');
+        tab.setAttribute('class', 'tab');
+        tab.setAttribute('data-tab', key);
+        tab.innerHTML = key;
+        tab.addEventListener("click", () => {
+            changeTab(tab);
+        });
+        if (!tabs[0])
+            changeTab(tab);
+        document.getElementById('tabs').appendChild(tab);
+    });
+}
+
+function changeTab(tab) {
+    tabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    workflowsList[tab.getAttribute("data-tab")].triggers.forEach((trigger) => {
+        createTrigger(trigger);
+        createSteps(trigger.steps);
+        createRelations(trigger.relations);
+    });
+}
+
+function createResizer() {
+    const resizer = document.createElement('div');
+    resizer.setAttribute('class', 'resizer');
+    return resizer;
+}
+
 function createTrigger(trigger) {
-    let currentTrigger = triggersList.filter(item => { return item.code === trigger.code })[0];
-    const divTrigger = document.createElement("div");
-    divTrigger.setAttribute("class", "trigger");
-    divTrigger.setAttribute("style", `top:${trigger.x}px; left:${trigger.y}px`);
-    divTrigger.dataset.id = trigger.id;
-    const divTriggerTitle = document.createElement("div");
-    divTriggerTitle.setAttribute("class", "triggertitle");
-    divTriggerTitle.innerHTML = currentTrigger.name;
-    divTrigger.appendChild(divTriggerTitle);
-    currentTrigger.inputs.forEach((input) => {
-        createInputParameter(trigger, 'trigger', input, divTrigger);
-    });
-    currentTrigger.outputs.forEach((output) => {
-        createOutputParameter(trigger, 'trigger', output, divTrigger);
-    });
-    canvas.appendChild(divTrigger);
+    createElement(trigger, 'trigger', triggersList);
 }
 
 function createSteps(steps) {
@@ -98,48 +112,92 @@ function createSteps(steps) {
 }
 
 function createStep(step) {
-    let currentStep = stepsList.filter(item => { return item.code === step.code })[0];
-    const divStep = document.createElement("div");
-    divStep.setAttribute("class", "step");
-    divStep.setAttribute("style", `top:${step.x}px; left:${step.y}px`);
-    divStep.dataset.id = step.id;
-    const divStepTitle = document.createElement("div");
-    divStepTitle.setAttribute("class", "steptitle");
-    divStepTitle.innerHTML = currentStep.name;
-    divStep.appendChild(divStepTitle);
-    currentStep.inputs.forEach((input) => {
-        createInputParameter(step, 'step', input, divStep);
-    });
-    currentStep.outputs.forEach((output) => {
-        createOutputParameter(step, 'step', output, divStep);
-    });
-    canvas.appendChild(divStep);
+    createElement(step, 'step', stepsList);
 }
 
-function createInputParameter(element, elementType, parameter, div) {
-    const divLabel = document.createElement("div");
-    divLabel.setAttribute("class", 'parametertext textinput');
+function createElement(element, elementType, elementsList) {
+    let currentElement = elementsList.filter(item => { return item.code === element.code })[0];
+    const divElement = document.createElement('div');
+    divElement.setAttribute('class', elementType);
+    divElement.setAttribute('style', `top:${element.x}px; left:${element.y}px; height:${element.height}px; width:${element.width}px`);
+    divElement.dataset.id = element.id;
+    const divElementTitle = document.createElement('div');
+    divElementTitle.setAttribute('class', `${elementType}title`);
+    divElementTitle.innerHTML = currentElement.name;
+
+    const divParameters = document.createElement('div');
+    divParameters.setAttribute('class', 'parameters');
+    var gridRowInputs = 1;
+    currentElement.inputs.forEach((input) => {
+        createInputParameter(element, elementType, input, divParameters, gridRowInputs);
+        gridRowInputs++;
+    });
+    var gridRowOutputs = 1;
+    currentElement.outputs.forEach((output) => {
+        createOutputParameter(element, elementType, output, divParameters, gridRowOutputs);
+        gridRowOutputs++;
+    });
+
+    const divConstants = document.createElement('div');
+    divConstants.setAttribute('class', 'constants');
+    var gridRowConstants = 1;
+    currentElement.constants.forEach((constant) => {
+        createConstantParameter(element, elementType, currentElement, constant, divConstants, gridRowConstants);
+        gridRowConstants++;
+    });
+    divElement.appendChild(divElementTitle);
+    divElement.appendChild(createResizer());
+    if (gridRowInputs > 1 || gridRowOutputs > 1)
+        divElement.appendChild(divParameters);
+    if (gridRowConstants > 1)
+        divElement.appendChild(divConstants);
+    canvas.appendChild(divElement);
+}
+
+function createInputParameter(element, elementType, parameter, div, gridRow) {
+    const divLabel = document.createElement('div');
+    divLabel.setAttribute('class', 'parametertext textinput');
+    divLabel.setAttribute('style', `grid-row: ${gridRow}`);
     divLabel.innerHTML = parameter.name;
-    const divAnchor = document.createElement("div");
-    divAnchor.setAttribute("class", `parameteranchor anchorinput ${parameter.type}`);
-    divAnchor.setAttribute("alt", parameter.name);
+    const divAnchor = document.createElement('div');
+    divAnchor.setAttribute('class', `parameteranchor anchorinput ${parameter.type}`);
+    divAnchor.setAttribute('alt', parameter.name);
+    divAnchor.setAttribute('style', `grid-row: ${gridRow}`);
     divAnchor.dataset.id = `${elementType}.${element.id}.${parameter.code}`;
     divAnchor.dataset.type = `${parameter.type}`;
-    divAnchor.innerHTML = "&nbsp;";
+    divAnchor.innerHTML = '&nbsp;';
     div.appendChild(divAnchor);
     div.appendChild(divLabel);
 }
 
-function createOutputParameter(element, elementType, parameter, div) {
-    const divLabel = document.createElement("div");
-    divLabel.setAttribute("class", 'parametertext textoutput');
+function createConstantParameter(element, elementType, currentElement, parameter, div, gridRow) {
+    const divLabel = document.createElement('div');
+    divLabel.setAttribute('class', 'parametertext textconstant');
+    divLabel.setAttribute('style', `grid-row: ${gridRow}`);
     divLabel.innerHTML = parameter.name;
-    const divAnchor = document.createElement("div");
-    divAnchor.setAttribute("class", `parameteranchor anchoroutput ${parameter.type}`);
-    divAnchor.setAttribute("alt", parameter.name);
+    const input = document.createElement('input');
+    input.setAttribute('class', 'inputconstant');
+    input.setAttribute('type', parameter.type);
+    input.setAttribute('style', `grid-row: ${gridRow}`);
+    input.value = currentElement[parameter.code];
+    input.dataset.id = `${elementType}.${element.id}.${parameter.code}`;
+    input.dataset.type = `${parameter.type}`;
+    div.appendChild(divLabel);
+    div.appendChild(input);
+}
+
+function createOutputParameter(element, elementType, parameter, div, gridRow) {
+    const divLabel = document.createElement('div');
+    divLabel.setAttribute('class', 'parametertext textoutput');
+    divLabel.setAttribute('style', `grid-row: ${gridRow}`);
+    divLabel.innerHTML = parameter.name;
+    const divAnchor = document.createElement('div');
+    divAnchor.setAttribute('class', `parameteranchor anchoroutput ${parameter.type}`);
+    divAnchor.setAttribute('alt', parameter.name);
+    divAnchor.setAttribute('style', `grid-row: ${gridRow}`);
     divAnchor.dataset.id = `${elementType}.${element.id}.${parameter.code}`;
     divAnchor.dataset.type = `${parameter.type}`;
-    divAnchor.innerHTML = "&nbsp;";
+    divAnchor.innerHTML = '&nbsp;';
     div.appendChild(divLabel);
     div.appendChild(divAnchor);
 }
@@ -152,16 +210,16 @@ function createRelations(relations) {
 }
 
 function createRelation(relation) {
-    const from = document.querySelector(`.anchoroutput[data-id="${relation.from}"]`);
-    const to = document.querySelector(`.anchorinput[data-id="${relation.to}"]`);
+    const from = document.querySelector(`.anchoroutput[data-id='${relation.from}']`);
+    const to = document.querySelector(`.anchorinput[data-id='${relation.to}']`);
     createConnection(from, to);
 }
 
 function createConnection(parameterFrom, parameterTo) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("stroke", "#aaa");
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke-width", "2");
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke', '#aaa');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-width', '2');
     path.dataset.from = parameterFrom.dataset.id;
     path.dataset.to = parameterTo.dataset.id;
     connections.appendChild(path);
@@ -169,10 +227,11 @@ function createConnection(parameterFrom, parameterTo) {
 }
 
 function updateConnections() {
-    const paths = connections.querySelectorAll("path");
+    const paths = connections.querySelectorAll('path');
+    canvasRect = canvas.getBoundingClientRect();
     paths.forEach((path) => {
-        const from = document.querySelector(`.anchoroutput[data-id="${path.dataset.from}"]`);
-        const to = document.querySelector(`.anchorinput[data-id="${path.dataset.to}"]`);
+        const from = document.querySelector(`.anchoroutput[data-id='${path.dataset.from}']`);
+        const to = document.querySelector(`.anchorinput[data-id='${path.dataset.to}']`);
         if (from && to) {
             const rectFrom = from.getBoundingClientRect();
             const rectTo = to.getBoundingClientRect();
@@ -184,34 +243,39 @@ function updateConnections() {
 
             const dx = Math.abs(xTo - xFrom) / 2;
             const pathData = `M ${xFrom} ${yFrom} C ${xFrom + dx} ${yFrom}, ${xTo - dx} ${yTo}, ${xTo} ${yTo}`;
-            path.setAttribute("d", pathData);
-            path.setAttribute("class", `parameterpath ${from.dataset.type}`);
+            path.setAttribute('d', pathData);
+            path.setAttribute('class', `parameterpath ${from.dataset.type}`);
         }
     });
 }
 
 function addEventListener() {
-    canvas.addEventListener("mousedown", (e) => {
-        if (e.target.classList.contains("steptitle") || e.target.classList.contains("triggertitle")) {
-            currentDragStep = e.target.parentElement;
-            currentDragStep.firstChild.style.cursor = "grabbing";
-            currentDragStep.offsetX = e.offsetX + canvasRect.left;
-            currentDragStep.offsetY = e.offsetY + canvasRect.top;
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('steptitle') || e.target.classList.contains('triggertitle')) {
+            currentDragStep = e.target;
+            currentDragStep.style.cursor = 'grabbing';
+            currentDragStep.offsetX = parseInt(document.defaultView.getComputedStyle(currentDragStep.parentElement).left, 10) - e.clientX;
+            currentDragStep.offsetY = parseInt(document.defaultView.getComputedStyle(currentDragStep.parentElement).top, 10) - e.clientY;
         }
-        if (e.target.classList.contains("parameteranchor")) {
-            if (e.target.classList.contains("anchoroutput")) {
+        if (e.target.classList.contains('resizer')) {
+            currentDragResizer = e.target;
+            currentDragResizer.style.cursor = 'grabbing';
+            currentDragResizer.offsetX = parseInt(document.defaultView.getComputedStyle(currentDragResizer.parentElement).width, 10) - e.clientX;
+            currentDragResizer.offsetY = parseInt(document.defaultView.getComputedStyle(currentDragResizer.parentElement).height, 10) - e.clientY;
+        }
+        if (e.target.classList.contains('parameteranchor')) {
+            if (e.target.classList.contains('anchoroutput')) {
                 currentDragFrom = e.target
             } else {
                 currentDragTo = e.target
-                currentDragPath = document.querySelector(`.parameterpath[data-to="${currentDragTo.dataset.id}"]`);
+                currentDragPath = document.querySelector(`.parameterpath[data-to='${currentDragTo.dataset.id}']`);
             }
-
             if (!currentDragPath) {
-                currentDragPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                currentDragPath.setAttribute("stroke", "#aaa");
-                currentDragPath.setAttribute("fill", "none");
-                currentDragPath.setAttribute("stroke-width", "2");
-                currentDragPath.setAttribute("class", `parameterpath type${e.target.dataset.type}`);
+                currentDragPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                currentDragPath.setAttribute('stroke', '#aaa');
+                currentDragPath.setAttribute('fill', 'none');
+                currentDragPath.setAttribute('stroke-width', '2');
+                currentDragPath.setAttribute('class', `parameterpath type${e.target.dataset.type}`);
                 if (currentDragFrom) {
                     currentDragPath.dataset.from = currentDragFrom.dataset.id;
                 }
@@ -223,20 +287,27 @@ function addEventListener() {
         }
     });
 
-    canvas.addEventListener("mousemove", (e) => {
+    canvas.addEventListener('mousemove', (e) => {
         if (currentDragStep) {
-            const x = e.clientX - currentDragStep.offsetX;
-            const y = e.clientY - currentDragStep.offsetY;
-            currentDragStep.style.left = `${x}px`;
-            currentDragStep.style.top = `${y}px`;
+            const x = e.clientX + currentDragStep.offsetX;
+            const y = e.clientY + currentDragStep.offsetY;
+            currentDragStep.parentElement.style.left = `${x}px`;
+            currentDragStep.parentElement.style.top = `${y}px`;
             updateConnections();
         }
-
+        if (currentDragResizer) {
+            const width = e.clientX + currentDragResizer.offsetX;
+            const height = e.clientY + currentDragResizer.offsetY;
+            currentDragResizer.parentElement.style.width = `${width}px`;
+            currentDragResizer.parentElement.style.height = `${height}px`;
+            updateConnections();
+        }
         if (currentDragPath) {
             let xFrom = null;
             let yFrom = null;
             let xTo = null;
             let yTo = null;
+            canvasRect = canvas.getBoundingClientRect();
 
             if (currentDragFrom) {
                 const rectFrom = currentDragFrom.getBoundingClientRect();
@@ -259,22 +330,25 @@ function addEventListener() {
 
             const dx = Math.abs(xTo - xFrom) / 2;
             const pathData = `M ${xFrom} ${yFrom} C ${xFrom + dx} ${yFrom}, ${xTo - dx} ${yTo}, ${xTo} ${yTo}`;
-            currentDragPath.setAttribute("d", pathData);
+            currentDragPath.setAttribute('d', pathData);
         }
     });
 
-    canvas.addEventListener("mouseup", (e) => {
+    canvas.addEventListener('mouseup', (e) => {
         if (currentDragStep) {
-            currentDragStep.firstChild.style.cursor = "grab";
+            currentDragStep.style.cursor = 'grab';
             currentDragStep = null;
         }
-
+        if (currentDragResizer) {
+            currentDragResizer.style.cursor = 'se-resize';
+            currentDragResizer = null;
+        }
         if (currentDragPath) {
             console.log(e.target);
-            if (e.target.classList.contains("parameteranchor")) {
-                if (e.target.classList.contains("anchoroutput") && currentDragTo) {
+            if (e.target.classList.contains('parameteranchor')) {
+                if (e.target.classList.contains('anchoroutput') && currentDragTo) {
                     currentDragFrom = e.target
-                } else if (e.target.classList.contains("anchorinput") && currentDragFrom) {
+                } else if (e.target.classList.contains('anchorinput') && currentDragFrom) {
                     currentDragTo = e.target
                 }
 
@@ -292,10 +366,11 @@ function addEventListener() {
 }
 
 function start() {
-    canvas = document.getElementById("canvas");
+    canvas = document.getElementById('canvas');
     canvasRect = canvas.getBoundingClientRect();
-    connections = document.getElementById("connections");
+    connections = document.getElementById('connections');
     connectionsRect = connections.getBoundingClientRect();
+    tabs = document.querySelectorAll(".tab");
     getSteps();
     addEventListener();
 }

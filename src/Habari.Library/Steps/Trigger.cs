@@ -1,5 +1,4 @@
-﻿using Habari.Library.Base;
-using Habari.Library.Json;
+﻿using Habari.Library.Json;
 using Habari.Library.Parameters;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -18,6 +17,8 @@ public abstract class Trigger : ITrigger
 
     public abstract string Description { get; }
 
+    public int Height { get; set; }
+
     [JsonConverter(typeof(InputsJsonConverter))]
     public Inputs Inputs { get; } = new();
 
@@ -25,6 +26,8 @@ public abstract class Trigger : ITrigger
 
     [JsonConverter(typeof(OutputsJsonConverter))]
     public Outputs Outputs { get; } = new();
+
+    public int Width { get; set; }
 
     public int X { get; set; }
 
